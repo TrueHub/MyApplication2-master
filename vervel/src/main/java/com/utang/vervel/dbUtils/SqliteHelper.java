@@ -29,7 +29,7 @@ public class SqliteHelper extends SQLiteOpenHelper {
         createTabSql2 = "CREATE TABLE if not exists Magnetism(_id integer primary key autoincrement, timeLong integer, timeStr text, x integer,y integer,z integer)";
         createTabSql3 = "CREATE TABLE if not exists Palstance(_id integer primary key autoincrement, timeLong integer, timeStr text, x integer,y integer,z integer)";
         createTabSql4 = "CREATE TABLE if not exists Pressure(_id integer primary key autoincrement, timeLong integer, timeStr text, intensity integer)";
-        createTabSql5 = "CREATE TABLE if not exists Pulse(_id integer primary key autoincrement, timeLong integer, timeStr text, pulse integer)";
+        createTabSql5 = "CREATE TABLE if not exists Pulse(_id integer primary key autoincrement, timeLong integer, timeStr text, pulse integer,trustLevel integer)";
         db = getReadableDatabase();
 
     }
@@ -176,14 +176,17 @@ public class SqliteHelper extends SQLiteOpenHelper {
         db.beginTransaction();  //开启事务
         try {
             String time;
-            long pulse;
+            int pulse;
+            int trustLevel;
             for (int i = 0; i < list.size(); i++) {
                 time = DateUtils.getDateToString(list.get(i).getTime() * 1000);
                 pulse = list.get(i).getPulse();
+                trustLevel = list.get(i).getTrustLevel();
                 ContentValues values = new ContentValues();
                 values.put("timeLong", list.get(i).getTime());
                 values.put("timeStr", time);
                 values.put("pulse", pulse);
+                values.put("trustLevel", trustLevel);
                 db.insert("Pulse", "_id", values);
             }
             Log.i("MSL", "addPulseBySw: OK");

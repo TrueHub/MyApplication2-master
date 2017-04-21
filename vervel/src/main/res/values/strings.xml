@@ -15,4 +15,5 @@
         completions."
     </string>
     <string name="gattServiceName">com.utang.vervel.service.GATTService</string>
+    <string name="connect">连接</string>
 </resources>

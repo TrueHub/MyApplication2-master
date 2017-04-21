@@ -37,22 +37,24 @@ public class WriteToCSV {
         String fileDir = Environment.getExternalStorageDirectory().getAbsolutePath();//SD卡根目录
         fileDir += "/vervel/csv";
         File dirFile = new File(fileDir);
+//        Log.e("MSL", "writeAOG: dirFile.exists() = " + dirFile.exists());
         if (!dirFile.exists()) {
            boolean iss =  dirFile.mkdirs();
 //            Log.e("MSL", "writeAOG: filepath not exists,but i creat it :"  + iss);
         }
 
         File aogFile = new File(fileDir + "/" + name);
-
+//        Log.e("MSL", "writeAOG: aogFile.exists() = " + aogFile.exists());
         if (!aogFile.exists()) {
             try {
-                aogFile.createNewFile();
+                boolean creatResult = aogFile.createNewFile();
+                Log.e("MSL", "creat AOG File: " + creatResult);
                 addToFileByFileWriter(aogFile.getAbsolutePath(), "time,x,y,z\n");
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         for (int i = 0; i < list.size(); i++) {
             String time;
             int x, y, z;

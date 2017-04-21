@@ -3,7 +3,7 @@ package com.utang.vervel.utils;
 import org.greenrobot.eventbus.EventBus;
 
 public class EventUtil {
-//注册事件
+    //注册事件
     public static void register(Object context) {
         if (!EventBus.getDefault().isRegistered(context)) {
             EventBus.getDefault().register(context);

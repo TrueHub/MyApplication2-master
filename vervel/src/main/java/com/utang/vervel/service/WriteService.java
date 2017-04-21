@@ -29,7 +29,7 @@ public class WriteService extends Service {
     public void onCreate() {
         super.onCreate();
         userBean = UserBean.getInstence();
-
+        Log.i("MSL", "onCreate: write service");
         new Thread() {
             @Override
             public void run() {
@@ -54,13 +54,13 @@ public class WriteService extends Service {
 
     public void writeByCsv() {
         if (userBean.getAogArrayList().size() >= DATA_SIZE) {
-            WriteToCSV.writeAOG(userBean.getAogArrayList(), "AOG.csv");
+            WriteToCSV.writeAOG(userBean.getAogArrayList(), "GravA.csv");
         }
         if (userBean.getMagnetismArrayList().size() >= DATA_SIZE) {
-            WriteToCSV.writeMagnetism(userBean.getMagnetismArrayList(), "Magnetism.csv");
+            WriteToCSV.writeMagnetism(userBean.getMagnetismArrayList(), "Mag.csv");
         }
         if (userBean.getPalstanceArrayList().size() >= DATA_SIZE) {
-            WriteToCSV.writePalstance(userBean.getPalstanceArrayList(), "palstance.csv");
+            WriteToCSV.writePalstance(userBean.getPalstanceArrayList(), "AngV.csv");
         }
         if (userBean.getPressureArrayList().size() >= DATA_SIZE) {
             WriteToCSV.writePressure(userBean.getPressureArrayList(), "Pressure.csv");

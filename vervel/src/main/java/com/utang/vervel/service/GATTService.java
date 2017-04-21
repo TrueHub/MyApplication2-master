@@ -20,6 +20,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
+import java.util.List;
 
 import com.utang.vervel.beans.AOG;
 import com.utang.vervel.beans.DeviceStatusBean;
@@ -36,9 +37,9 @@ import com.utang.vervel.utils.EventUtil;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.util.List;
 
-import static android.content.ContentValues.TAG;
+
+
 
 /**
  * Created by Dell on 2017-4-16.
@@ -46,8 +47,8 @@ import static android.content.ContentValues.TAG;
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 public class GATTService extends Service {
 
-//    private String deviceName = "Nordic-FC0942090";//目标设备的名称，只连接这个设备
-        private String deviceName = "Nordic-9FBEE5315";//目标设备的名称，只连接这个设备
+//    private String deviceName = "Nordic-FC0942090";//目标设备的名称，连接这个设备
+    private String deviceName = "Nordic-9FBEE5315";//目标设备的名称，连接这个设备
     private BluetoothAdapter mBluetoothAdapter;
     private LeScanCallback_LOLLIPOP mScanCallBack_lollipop;//5.0以上
     private LeScanCallback_JELLY_BEAN mScanCallBack_jelly;//4.3以上
@@ -104,12 +105,11 @@ public class GATTService extends Service {
         }
         if (mGattCallback == null) mGattCallback = new BLEGATTCallBack();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {//5.0以上
             if (mScanCallBack_lollipop == null) mScanCallBack_lollipop = new LeScanCallback_LOLLIPOP();
             mBluetoothScanner = mBluetoothAdapter.getBluetoothLeScanner();
             mBluetoothScanner.startScan(mScanCallBack_lollipop);
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {//4.3 ~ 5.0
             if (mScanCallBack_lollipop == null) mScanCallBack_jelly = new LeScanCallback_JELLY_BEAN();
             mBluetoothAdapter.startLeScan(mScanCallBack_jelly);
 
@@ -119,20 +119,16 @@ public class GATTService extends Service {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                if (mScanning == true) {
-                    Log.d(TAG, "Stop Scan Time Out");
+                if (mScanning) {
+                    Log.d("MSL", "Stop Scan， Time Out");
                     mScanning = false;
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         mBluetoothScanner.stopScan(mScanCallBack_lollipop);
                     }
                 }
             }
-        }, 1000 * 20);
+        }, 1000 * 10);
 
-        //连接设备
-        /*if (mTarget != null) {
-            mTarget.connectGatt(this, true, mGattCallback);
-        }*/
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -181,8 +177,6 @@ public class GATTService extends Service {
         }
     }
 
-    private List<BluetoothGattService> serviceList;
-
     private class BLEGATTCallBack extends BluetoothGattCallback {
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
@@ -207,6 +201,7 @@ public class GATTService extends Service {
 
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
+            List<BluetoothGattService> serviceList;
             //发现新的设备
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 Log.i("MSL", "onServicesDiscovered: 发现新的设备");
@@ -248,25 +243,22 @@ public class GATTService extends Service {
 
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-            Log.d("MSL", "onCharacteristicRead:  " + status);
             commandPool.onCommandCallbackComplete();
         }
 
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-            Log.d("MSL", "onCharacteristicWrite: " + status);
+//            Log.d("MSL", "onCharacteristicWrite: " + status);
             commandPool.onCommandCallbackComplete();
         }
 
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
-            Log.i("MSL", "onCharacteristicChanged: ");
-
+//            Log.i("MSL", "onCharacteristicChanged: ");
             if (characteristic.getUuid().equals(ConstantPool.UUID_NOTIFY)) {
-
                 commandPool.onCommandCallbackComplete();
                 byte[] data = characteristic.getValue();
-                Log.d("MSL", "onCharacteristicChanged: " + DataUtils.bytes2hex(data));
+//                Log.d("MSL", "onCharacteristicChanged: " + DataUtils.bytes2hex(data));
                 readData(data);
             }
 
@@ -332,13 +324,14 @@ public class GATTService extends Service {
         }
     }
 
-    public void readData(byte[] data) {
+    public void readData(byte[] data) throws NullPointerException{
+/*
 
         for (byte b : data
                 ) {
             Log.i("MSL", " data长度：" + data.length + ",分别为：" + b);
         }
-
+*/
 
         if (data[1] == ConstantPool.INSTRUCT_SET_TIME) {//返回：设定时间成功
             EventUtil.post("SET_TIME_SUCCESS!");
@@ -352,42 +345,34 @@ public class GATTService extends Service {
             int length = DataUtils.byte2Int(data[1]);//设备返回的数据长度
 
             byte[] timeBytes = new byte[4];//时间数组
-            for (int i = 0; i < 4; i++) {
-                timeBytes[i] = data[i + 3];
-            }
+            System.arraycopy(data,3,timeBytes,0,timeBytes.length);
             int timeInt = DataUtils.bytes2IntUnsigned(timeBytes);//这里的timeInt是秒级别的
 
             if (!needSetTime(timeInt) && data[2] != ConstantPool.INSTRUCT_SEARCH_TIME) {
                 commandPool.addCommand(CommandPool.Type.write,ConstantPool.DELETE_FLASH,vibrationChar);
             }
-            Log.i("MSL", "readData: " + timeInt);
+//            Log.i("MSL", "readData: " + timeInt);
             byte[] datas = null;//除去数据长度、指令、时间 之后的数组
             if (length > 5) {
                 datas = new byte[length - 5];
-                for (int i = 0; i < datas.length; i++) {
-                    datas[i] = data[i + 7];
-                }
+                System.arraycopy(data,7,datas,0,datas.length);
             }
 
             switch (data[2]) {
                 case ConstantPool.INSTRUCT_SEARCH_TIME://返回：查询设备状态
-
                     DeviceStatusBean deviceStatusBean = new DeviceStatusBean();
-
                     deviceStatusBean.setTime(timeInt);
                     deviceStatusBean.setPulseAbnomal_min(datas[0]);
                     deviceStatusBean.setPulseAbnomal_max(datas[1]);
 //                    deviceStatusBean.setSimplingFreq(datas[2]);//样品里没有九轴取样频率
                     deviceStatusBean.setDeviceElec(datas[2]);
                     EventUtil.post(deviceStatusBean);
-
                     if (!needSetTime(timeInt)) {
                         EventUtil.post("设备时间校对一致");
                     } else {
                         Log.i("MSL", "readData: set time");
                         writeTime();
                     }
-
                     break;
 
                 case ConstantPool.INSTRUCT_HIS://返回：查询心率历史
@@ -395,11 +380,7 @@ public class GATTService extends Service {
                     pulse.setTime(timeInt);
                     pulse.setPulse(DataUtils.byte2Int(data[7]));
                     pulse.setTrustLevel(DataUtils.byte2Int(data[8]));
-
-                    //以后可以限制pulseList的size大小，到阀值的时候就上传数据或者保存，然后清空list
                     EventUtil.post(pulse);
-
-
                     break;
 
                 case ConstantPool.INSTRUCT_SEARCH_AOG_HIS://返回：查询重力加速度历史
@@ -408,41 +389,31 @@ public class GATTService extends Service {
                     mAOG.setVelX(DataUtils.bytes2IntSigned(new byte[]{datas[0], datas[1]}));
                     mAOG.setVelY(DataUtils.bytes2IntSigned(new byte[]{datas[2], datas[3]}));
                     mAOG.setVelZ(DataUtils.bytes2IntSigned(new byte[]{datas[4], datas[5]}));
-
                     EventUtil.post(mAOG);
-
                     break;
 
                 case ConstantPool.INSTRUCT_SEARCH_PALSTANCE://返回：查询角速度历史
-
                     Palstance palstance = new Palstance();
-
                     palstance.setTime(timeInt);
                     palstance.setVelX(DataUtils.bytes2IntSigned(new byte[]{datas[0], datas[1]}));
                     palstance.setVelY(DataUtils.bytes2IntSigned(new byte[]{datas[2], datas[3]}));
                     palstance.setVelZ(DataUtils.bytes2IntSigned(new byte[]{datas[4], datas[5]}));
-                    //以后可以限制palstanceList的size大小，到阀值的时候就上传数据或者保存，然后清空list
                     EventUtil.post(palstance);
-
                     break;
 
                 case ConstantPool.INSTRUCT_SEARCH_MAGNETISM://返回：查询地磁历史
                     Magnetism magnetism = new Magnetism();
-
                     magnetism.setTime(timeInt);
                     magnetism.setStrengthX(DataUtils.bytes2IntSigned(new byte[]{datas[0], datas[1]}));
                     magnetism.setStrengthY(DataUtils.bytes2IntSigned(new byte[]{datas[2], datas[3]}));
                     magnetism.setStrengthZ(DataUtils.bytes2IntSigned(new byte[]{datas[4], datas[5]}));
-
                     EventUtil.post(magnetism);
-
                     break;
+
                 case ConstantPool.INSTRUCT_SEARCH_PRESSURE://返回：查询气压历史
                     Pressure pressure = new Pressure();
-
                     pressure.setTime(timeInt);
                     pressure.setIntensityOfPressure(DataUtils.bytes2Long(datas));
-
                     EventUtil.post(pressure);
                     break;
             }
@@ -451,27 +422,23 @@ public class GATTService extends Service {
 
     private void writeTime() {
         byte[] currentTimeBytes = DataUtils.int2Bytes((int) (System.currentTimeMillis() / 1000));//需要发送的时间戳的长度
-        Log.d("MSL", "writeTime: " + currentTimeBytes.length + "," + currentTimeBytes[0] + "," + currentTimeBytes[1] + "," + currentTimeBytes[2] + "," + currentTimeBytes[3]);
+//        Log.d("MSL", "writeTime: " + currentTimeBytes.length + "," + currentTimeBytes[0] + "," + currentTimeBytes[1] + "," + currentTimeBytes[2] + "," + currentTimeBytes[3]);
         byte[] setTimeBytes = new byte[8];//整条指令的长度
         setTimeBytes[0] = ConstantPool.HEAD;
         setTimeBytes[1] = (byte) 0x06;
         setTimeBytes[2] = (byte) 0x01;
-        for (int i = 0; i < currentTimeBytes.length; i++) {
+        /*for (int i = 0; i < currentTimeBytes.length; i++) {
             setTimeBytes[i + 3] = currentTimeBytes[i];
-        }
+        }*/
+        System.arraycopy(currentTimeBytes,0,setTimeBytes,3,currentTimeBytes.length);
         setTimeBytes[setTimeBytes.length - 1] = ConstantPool.END;
-
         commandPool.addCommand(CommandPool.Type.write, setTimeBytes, vibrationChar);
     }
 
     private boolean needSetTime(int time) {
         int current = (int) (System.currentTimeMillis() / 1000);
-        Log.d("MSL", "needSetTime: " + current + "," + time);
-        if (Math.abs(time - current) <= 1) {
-            return false;
-        } else {
-            return true;
-        }
+//        Log.d("MSL", "needSetTime: " + current + "," + time);
+        return Math.abs(time - current) > 1;
     }
 
 }

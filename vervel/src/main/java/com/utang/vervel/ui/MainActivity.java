@@ -38,6 +38,8 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 
+import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private Button btn_connect;
@@ -77,7 +79,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             return false;
         }
     });
-    private Runnable runnable_time, runnable_devicetime;
+    private Runnable runnable_time;
     private TextView tv_getdata_his_time;
     private TextView tv_pulse_his;
     private TextView tv_magnetism_X;
@@ -96,6 +98,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TextView tv_trust_lv_his;
     private Button btn_delete_flash;
     private Intent gattService;
+    private int LIST_SIZE = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -353,7 +356,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public synchronized void getBluetoothHelathCallback(DeviceStatusBean deviceStatusBean) {
 
         final int[] time = {deviceStatusBean.getTime()};
-        Log.i("MSL", "getBluetoothHelathCallback: " + (long) time[0] * 1000 + "," + time[0]);
+//        Log.i("MSL", "getBluetoothHelathCallback: " + (long) time[0] * 1000 + "," + time[0]);
         int pulseAbnomal_min = deviceStatusBean.getPulseAbnomal_min();
         int pulseAbnomal_max = deviceStatusBean.getPulseAbnomal_max();
         int simplingFreq = deviceStatusBean.getSimplingFreq();
@@ -368,8 +371,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Subscribe(threadMode = ThreadMode.MAIN)
     public synchronized void getBluetoothHelathCallback(Pulse pulse) {
         //心率历史
-        pulseArrayList.add(pulse);
-        if (pulseArrayList.size() == 1000) {
+       pulseArrayList.add(pulse);
+        if (pulseArrayList.size() == LIST_SIZE) {
             ArrayList<Pulse> list = new ArrayList<>();
             list.addAll(pulseArrayList);
             userBean.setPulseArrayList(list);
@@ -402,7 +405,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public synchronized void getBluetoothHelathCallback(AOG aog) {
         //心率历史
         aogArrayList.add(aog);
-        if (aogArrayList.size() == 1000) {
+        if (aogArrayList.size() == LIST_SIZE) {
             ArrayList<AOG> list = new ArrayList<>();
             list.addAll(aogArrayList);
             userBean.setAogArrayList(list);
@@ -419,7 +422,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public synchronized void getBluetoothHelathCallback(Palstance palstance) {
         //心率历史
         palstanceArrayList.add(palstance);
-        if (palstanceArrayList.size() == 1000) {
+        if (palstanceArrayList.size() == LIST_SIZE) {
             ArrayList<Palstance> list = new ArrayList<>();
             list.addAll(palstanceArrayList);
             userBean.setPalstanceArrayList(list);
@@ -436,7 +439,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public synchronized void getBluetoothHelathCallback(Magnetism magnetism) {
         //心率历史
         magnetismArrayList.add(magnetism);
-        if (magnetismArrayList.size() == 1000) {
+        if (magnetismArrayList.size() == LIST_SIZE) {
             ArrayList<Magnetism> list = new ArrayList<>();
             list.addAll(magnetismArrayList);
             userBean.setMagnetismArrayList(list);
@@ -453,14 +456,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public synchronized void getBluetoothHelathCallback(Pressure pressure) {
         //心率历史
         pressureArrayList.add(pressure);
-        if (pressureArrayList.size() == 1000) {
+        if (pressureArrayList.size() == LIST_SIZE) {
             ArrayList<Pressure> list = new ArrayList<>();
             list.addAll(pressureArrayList);
             userBean.setPressureArrayList(list);
             pressureArrayList.clear();
 //            Log.i("MSL", "getBluetoothHelathCallback: " + userBean.getPulseArrayList().size() + "," + pressureArrayList.size() + "," +list.size());
         }
-        Log.i("MSL", "getBluetoothHelathCallback: pressure.getTime() * 1000 = " + pressure.getTime() * 1000);
+//        Log.i("MSL", "getBluetoothHelathCallback: pressure.getTime() * 1000 = " + pressure.getTime() * 1000);
         tv_pressure.setText(String.valueOf(pressure.getIntensityOfPressure()));
         tv_getdata_his_time.setText(DateUtils.getDateToString(pressure.getTime() * 1000));
     }
