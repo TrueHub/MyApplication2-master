@@ -17,14 +17,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.utang.vervel.R;
-import com.utang.vervel.beans.AOG;
+import com.utang.vervel.beans.AngV;
 import com.utang.vervel.beans.DeviceStatusBean;
-import com.utang.vervel.beans.Magnetism;
-import com.utang.vervel.beans.Palstance;
+import com.utang.vervel.beans.GravA;
+import com.utang.vervel.beans.Mag;
 import com.utang.vervel.beans.Pressure;
 import com.utang.vervel.beans.Pulse;
 import com.utang.vervel.beans.PulseBean;
 import com.utang.vervel.beans.UserBean;
+import com.utang.vervel.eventbean.EventNotification;
 import com.utang.vervel.moudul.ControlDeviceImp;
 import com.utang.vervel.service.GATTService;
 import com.utang.vervel.service.WriteService;
@@ -37,8 +38,6 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
-
-import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -88,10 +87,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Toast toast;
     private boolean isStarted;
     ArrayList<Pulse> pulseArrayList = new ArrayList<>();
-    ArrayList<Magnetism> magnetismArrayList = new ArrayList<>();
+    ArrayList<Mag> magArrayList = new ArrayList<>();
     ArrayList<Pressure> pressureArrayList = new ArrayList<>();
-    ArrayList<AOG> aogArrayList = new ArrayList<>();
-    ArrayList<Palstance> palstanceArrayList = new ArrayList<>();
+    ArrayList<GravA> gravAArrayList = new ArrayList<>();
+    ArrayList<AngV> angVArrayList = new ArrayList<>();
     private UserBean userBean;
     private Intent writeServiceIntent;
     private TextView tv_trust_lv;
@@ -99,6 +98,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button btn_delete_flash;
     private Intent gattService;
     private int LIST_SIZE = 100;
+    private TextView tv_device_name;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -186,6 +186,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         btn_delete_flash = (Button) findViewById(R.id.btn_delete_flash);
         btn_delete_flash.setOnClickListener(this);
+        tv_device_name = (TextView) findViewById(R.id.tv_device_name);
+        tv_device_name.setOnClickListener(this);
     }
 
     @Override
@@ -196,13 +198,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if (btn_connect.getText().equals("连接")) {
                     if (ServiceUtils.isServiceWork(this, getString(R.string.gattServiceName))) {
                         EventUtil.post("START CONNECT");
-                        Log.e("MSL", "onClick: gatt service is running" );
+                        Log.e("MSL", "onClick: gatt service is running");
                     } else {
                         gattService = new Intent(this, GATTService.class);
                         startService(gattService);
                         writeServiceIntent = new Intent(this, WriteService.class);
                         startService(writeServiceIntent);
-                        Log.e("MSL", "onClick: gatt is not running" );
+                        Log.e("MSL", "onClick: gatt is not running");
                     }
                 } else if (btn_connect.getText().equals("断开")) {
                     EventUtil.post("STOP GATT_SERVICE");
@@ -236,13 +238,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 controlDeviceImp.searchPulseHis(pulseArrayList);
                 break;
             case R.id.btn_search_AOG:
-                controlDeviceImp.searchAOG(aogArrayList);
+                controlDeviceImp.searchAOG(gravAArrayList);
                 break;
             case R.id.btn_search_palstance:
-                controlDeviceImp.searchPalstance(palstanceArrayList);
+                controlDeviceImp.searchPalstance(angVArrayList);
                 break;
             case R.id.btn_search_magnetism:
-                controlDeviceImp.searchMagnetism(magnetismArrayList);
+                controlDeviceImp.searchMagnetism(magArrayList);
                 break;
             case R.id.btn_search_pressure:
                 controlDeviceImp.searchPressure(pressureArrayList);
@@ -287,15 +289,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void getBluetoothHelathCallback(String str) {
+    public void getGATTCallback(String str) {
         controlDeviceImp.showToast(str);
-        switch (str) {
-            case "断开GATT连接":
-                initAll();
-                break;
-            case "连接成功":
-                btn_connect.setText("断开");
-                break;
+    }
+
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void getDataOver(EventNotification eventNotification) {
+        if (eventNotification.isGetOver()) {
+            controlDeviceImp.showToast("连接" + eventNotification.getType() + "成功");
+            tv_device_name.setVisibility(View.VISIBLE);
+            tv_device_name.setText(eventNotification.getType());
+            btn_connect.setText("断开");
+        } else {
+            initAll();
         }
     }
 
@@ -303,6 +310,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * 断开连接后，activity所有控件恢复初始状态
      */
     private void initAll() {
+        tv_device_name.setVisibility(View.GONE);
         btn_connect.setText("连接");
         tv_device_status.setText("---请先获取设备状态---");
 
@@ -332,7 +340,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void getBluetoothHelathCallback(PulseBean pulseBean) {
+    public void getGATTCallback(PulseBean pulseBean) {
         tv_pulse.setText(pulseBean.getPulse() + "次/分钟");
         switch (pulseBean.getTrustLevel()) {
             case 0:
@@ -353,7 +361,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public synchronized void getBluetoothHelathCallback(DeviceStatusBean deviceStatusBean) {
+    public synchronized void getGATTCallback(DeviceStatusBean deviceStatusBean) {
 
         final int[] time = {deviceStatusBean.getTime()};
 //        Log.i("MSL", "getBluetoothHelathCallback: " + (long) time[0] * 1000 + "," + time[0]);
@@ -369,9 +377,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public synchronized void getBluetoothHelathCallback(Pulse pulse) {
+    public synchronized void getGATTCallback(Pulse pulse) {
         //心率历史
-       pulseArrayList.add(pulse);
+        pulseArrayList.add(pulse);
         if (pulseArrayList.size() == LIST_SIZE) {
             ArrayList<Pulse> list = new ArrayList<>();
             list.addAll(pulseArrayList);
@@ -402,58 +410,58 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public synchronized void getBluetoothHelathCallback(AOG aog) {
+    public synchronized void getGATTCallback(GravA gravA) {
         //心率历史
-        aogArrayList.add(aog);
-        if (aogArrayList.size() == LIST_SIZE) {
-            ArrayList<AOG> list = new ArrayList<>();
-            list.addAll(aogArrayList);
-            userBean.setAogArrayList(list);
-            aogArrayList.clear();
-//            Log.i("MSL", "getBluetoothHelathCallback: " + userBean.getAogArrayList().size() + "," + aogArrayList.size() + "," +list.size());
+        gravAArrayList.add(gravA);
+        if (gravAArrayList.size() == LIST_SIZE) {
+            ArrayList<GravA> list = new ArrayList<>();
+            list.addAll(gravAArrayList);
+            userBean.setGravAArrayList(list);
+            gravAArrayList.clear();
+//            Log.i("MSL", "getBluetoothHelathCallback: " + userBean.getGravAArrayList().size() + "," + gravAArrayList.size() + "," +list.size());
         }
-        tv_getdata_his_time.setText(DateUtils.getDateToString(aog.getTime() * 1000));
-        tv_AOG_X.setText(String.valueOf(aog.getVelX()));
-        tv_AOG_Y.setText(String.valueOf(aog.getVelY()));
-        tv_AOG_Z.setText(String.valueOf(aog.getVelZ()));
+        tv_getdata_his_time.setText(DateUtils.getDateToString(gravA.getTime() * 1000));
+        tv_AOG_X.setText(String.valueOf(gravA.getVelX()));
+        tv_AOG_Y.setText(String.valueOf(gravA.getVelY()));
+        tv_AOG_Z.setText(String.valueOf(gravA.getVelZ()));
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public synchronized void getBluetoothHelathCallback(Palstance palstance) {
+    public synchronized void getGATTCallback(AngV angV) {
         //心率历史
-        palstanceArrayList.add(palstance);
-        if (palstanceArrayList.size() == LIST_SIZE) {
-            ArrayList<Palstance> list = new ArrayList<>();
-            list.addAll(palstanceArrayList);
-            userBean.setPalstanceArrayList(list);
-            palstanceArrayList.clear();
-//            Log.i("MSL", "getBluetoothHelathCallback: " + userBean.getPalstanceArrayList().size() + "," + palstanceArrayList.size() + "," +list.size());
+        angVArrayList.add(angV);
+        if (angVArrayList.size() == LIST_SIZE) {
+            ArrayList<AngV> list = new ArrayList<>();
+            list.addAll(angVArrayList);
+            userBean.setAngVArrayList(list);
+            angVArrayList.clear();
+//            Log.i("MSL", "getBluetoothHelathCallback: " + userBean.getAngVArrayList().size() + "," + angVArrayList.size() + "," +list.size());
         }
-        tv_palstance_X.setText(String.valueOf(palstance.getVelX()));
-        tv_palstance_Y.setText(String.valueOf(palstance.getVelY()));
-        tv_palstance_Z.setText(String.valueOf(palstance.getVelZ()));
-        tv_getdata_his_time.setText(DateUtils.getDateToString(palstance.getTime() * 1000));
+        tv_palstance_X.setText(String.valueOf(angV.getVelX()));
+        tv_palstance_Y.setText(String.valueOf(angV.getVelY()));
+        tv_palstance_Z.setText(String.valueOf(angV.getVelZ()));
+        tv_getdata_his_time.setText(DateUtils.getDateToString(angV.getTime() * 1000));
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public synchronized void getBluetoothHelathCallback(Magnetism magnetism) {
+    public synchronized void getGATTCallback(Mag mag) {
         //心率历史
-        magnetismArrayList.add(magnetism);
-        if (magnetismArrayList.size() == LIST_SIZE) {
-            ArrayList<Magnetism> list = new ArrayList<>();
-            list.addAll(magnetismArrayList);
-            userBean.setMagnetismArrayList(list);
-            magnetismArrayList.clear();
-//            Log.i("MSL", "getBluetoothHelathCallback: " + userBean.getPulseArrayList().size() + "," + magnetismArrayList.size() + "," +list.size());
+        magArrayList.add(mag);
+        if (magArrayList.size() == LIST_SIZE) {
+            ArrayList<Mag> list = new ArrayList<>();
+            list.addAll(magArrayList);
+            userBean.setMagArrayList(list);
+            magArrayList.clear();
+//            Log.i("MSL", "getBluetoothHelathCallback: " + userBean.getPulseArrayList().size() + "," + magArrayList.size() + "," +list.size());
         }
-        tv_magnetism_X.setText(String.valueOf(magnetism.getStrengthX()));
-        tv_magnetism_Y.setText(String.valueOf(magnetism.getStrengthY()));
-        tv_magnetism_Z.setText(String.valueOf(magnetism.getStrengthZ()));
-        tv_getdata_his_time.setText(DateUtils.getDateToString(magnetism.getTime() * 1000));
+        tv_magnetism_X.setText(String.valueOf(mag.getStrengthX()));
+        tv_magnetism_Y.setText(String.valueOf(mag.getStrengthY()));
+        tv_magnetism_Z.setText(String.valueOf(mag.getStrengthZ()));
+        tv_getdata_his_time.setText(DateUtils.getDateToString(mag.getTime() * 1000));
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public synchronized void getBluetoothHelathCallback(Pressure pressure) {
+    public synchronized void getGATTCallback(Pressure pressure) {
         //心率历史
         pressureArrayList.add(pressure);
         if (pressureArrayList.size() == LIST_SIZE) {
@@ -467,6 +475,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         tv_pressure.setText(String.valueOf(pressure.getIntensityOfPressure()));
         tv_getdata_his_time.setText(DateUtils.getDateToString(pressure.getTime() * 1000));
     }
+
 
     private static void showMessageOKCancel(Activity activity, String message, DialogInterface.OnClickListener okListener) {
         new AlertDialog.Builder(activity)

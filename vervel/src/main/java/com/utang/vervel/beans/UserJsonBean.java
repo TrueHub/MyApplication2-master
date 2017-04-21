@@ -10,25 +10,14 @@ import java.util.ArrayList;
  * 单例user类
  */
 
-public class UserBean implements Parcelable {
+public class UserJsonBean implements Parcelable {
     private ArrayList<GravA> gravAArrayList = new ArrayList<>();
     private ArrayList<Mag> magArrayList = new ArrayList<>();
     private ArrayList<AngV> angVArrayList = new ArrayList<>();
     private ArrayList<Pressure> pressureArrayList = new ArrayList<>();
     private ArrayList<Pulse> pulseArrayList = new ArrayList<>();
 
-    private UserBean() {
-    }
-
-    private static class UserHolder {
-        private static final UserBean userBean = new UserBean();
-    }
-
-    public static UserBean getInstence() {
-        return UserHolder.userBean;
-    }
-
-    protected UserBean(Parcel in) {
+    public UserJsonBean(Parcel in) {
         gravAArrayList = in.createTypedArrayList(GravA.CREATOR);
         magArrayList = in.createTypedArrayList(Mag.CREATOR);
         angVArrayList = in.createTypedArrayList(AngV.CREATOR);
@@ -36,30 +25,20 @@ public class UserBean implements Parcelable {
         pulseArrayList = in.createTypedArrayList(Pulse.CREATOR);
     }
 
-    public static final Creator<UserBean> CREATOR = new Creator<UserBean>() {
+    public static final Creator<UserJsonBean> CREATOR = new Creator<UserJsonBean>() {
         @Override
-        public UserBean createFromParcel(Parcel in) {
-            return new UserBean(in);
+        public UserJsonBean createFromParcel(Parcel in) {
+            return new UserJsonBean(in);
         }
 
         @Override
-        public UserBean[] newArray(int size) {
-            return new UserBean[size];
+        public UserJsonBean[] newArray(int size) {
+            return new UserJsonBean[size];
         }
     };
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
+    public UserJsonBean() {
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeTypedList(gravAArrayList);
-        dest.writeTypedList(magArrayList);
-        dest.writeTypedList(angVArrayList);
-        dest.writeTypedList(pressureArrayList);
-        dest.writeTypedList(pulseArrayList);
     }
 
     public ArrayList<GravA> getGravAArrayList() {
@@ -102,7 +81,17 @@ public class UserBean implements Parcelable {
         this.pulseArrayList = pulseArrayList;
     }
 
-    public static Creator<UserBean> getCREATOR() {
-        return CREATOR;
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeTypedList(gravAArrayList);
+        dest.writeTypedList(magArrayList);
+        dest.writeTypedList(angVArrayList);
+        dest.writeTypedList(pressureArrayList);
+        dest.writeTypedList(pulseArrayList);
     }
 }

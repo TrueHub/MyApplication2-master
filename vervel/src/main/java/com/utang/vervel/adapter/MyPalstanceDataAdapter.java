@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 import com.utang.vervel.R;
-import com.utang.vervel.beans.Palstance;
+import com.utang.vervel.beans.AngV;
 import com.utang.vervel.utils.DateUtils;
 import java.util.ArrayList;
 
@@ -15,11 +15,11 @@ import java.util.ArrayList;
  * Created by user on 2017/4/7.
  */
 public class MyPalstanceDataAdapter extends BaseAdapter {
-    private ArrayList<Palstance> list;
+    private ArrayList<AngV> list;
     private Context context;
     private LayoutInflater layoutInflater;
 
-    public MyPalstanceDataAdapter(ArrayList<Palstance> list, Context context) {
+    public MyPalstanceDataAdapter(ArrayList<AngV> list, Context context) {
         this.list = list;
         this.context = context;
         this.layoutInflater = LayoutInflater.from(context);
@@ -50,7 +50,7 @@ public class MyPalstanceDataAdapter extends BaseAdapter {
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
-        Palstance obj = list.get(position);
+        AngV obj = list.get(position);
         viewHolder.tv__result_time.setText(DateUtils.getDateToString(obj.getTime() * 1000));
         viewHolder.tv__result_x.setText(String.valueOf(obj.getVelX()));
         viewHolder.tv__result_y.setText(String.valueOf(obj.getVelY()));

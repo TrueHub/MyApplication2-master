@@ -6,9 +6,9 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
-import com.utang.vervel.beans.AOG;
-import com.utang.vervel.beans.Magnetism;
-import com.utang.vervel.beans.Palstance;
+import com.utang.vervel.beans.GravA;
+import com.utang.vervel.beans.Mag;
+import com.utang.vervel.beans.AngV;
 import com.utang.vervel.beans.Pressure;
 import com.utang.vervel.beans.Pulse;
 import com.utang.vervel.beans.UserBean;
@@ -25,9 +25,9 @@ public class SqliteHelper extends SQLiteOpenHelper {
     public SqliteHelper(Context context) {
         super(context, "health.db", null, 1);
 
-        createTabSql1 = "CREATE TABLE if not exists AOG(_id integer primary key autoincrement, timeLong integer,timeStr text, x integer,y integer,z integer)";
-        createTabSql2 = "CREATE TABLE if not exists Magnetism(_id integer primary key autoincrement, timeLong integer, timeStr text, x integer,y integer,z integer)";
-        createTabSql3 = "CREATE TABLE if not exists Palstance(_id integer primary key autoincrement, timeLong integer, timeStr text, x integer,y integer,z integer)";
+        createTabSql1 = "CREATE TABLE if not exists GravA(_id integer primary key autoincrement, timeLong integer,timeStr text, x integer,y integer,z integer)";
+        createTabSql2 = "CREATE TABLE if not exists Mag(_id integer primary key autoincrement, timeLong integer, timeStr text, x integer,y integer,z integer)";
+        createTabSql3 = "CREATE TABLE if not exists AngV(_id integer primary key autoincrement, timeLong integer, timeStr text, x integer,y integer,z integer)";
         createTabSql4 = "CREATE TABLE if not exists Pressure(_id integer primary key autoincrement, timeLong integer, timeStr text, intensity integer)";
         createTabSql5 = "CREATE TABLE if not exists Pulse(_id integer primary key autoincrement, timeLong integer, timeStr text, pulse integer,trustLevel integer)";
         db = getReadableDatabase();
@@ -50,21 +50,21 @@ public class SqliteHelper extends SQLiteOpenHelper {
     }
 
     public void insertDataBySw() {
-        if (userBean.getAogArrayList().size() != 0) {
-            addAOGBySw(userBean.getAogArrayList());
-            userBean.getAogArrayList().clear();
+        if (userBean.getGravAArrayList().size() != 0) {
+            addAOGBySw(userBean.getGravAArrayList());
+            userBean.getGravAArrayList().clear();
         }
         if (userBean.getPulseArrayList().size() != 0) {
             addPulseBySw(userBean.getPulseArrayList());
             userBean.getPulseArrayList().clear();
         }
-        if (userBean.getPalstanceArrayList().size() != 0) {
-            addPalstanceBySw(userBean.getPalstanceArrayList());
-            userBean.getPalstanceArrayList().clear();
+        if (userBean.getAngVArrayList().size() != 0) {
+            addPalstanceBySw(userBean.getAngVArrayList());
+            userBean.getAngVArrayList().clear();
         }
-        if (userBean.getMagnetismArrayList().size() != 0) {
-            addMagnetismBySw(userBean.getMagnetismArrayList());
-            userBean.getMagnetismArrayList().clear();
+        if (userBean.getMagArrayList().size() != 0) {
+            addMagnetismBySw(userBean.getMagArrayList());
+            userBean.getMagArrayList().clear();
         }
         if (userBean.getPressureArrayList().size() != 0) {
             addPressureBySw(userBean.getPressureArrayList());
@@ -72,7 +72,7 @@ public class SqliteHelper extends SQLiteOpenHelper {
         }
     }
 
-    public void addAOGBySw(ArrayList<AOG> list) {
+    public void addAOGBySw(ArrayList<GravA> list) {
         db.beginTransaction();
         try {
             String time;
@@ -88,7 +88,7 @@ public class SqliteHelper extends SQLiteOpenHelper {
                 values.put("x", x);
                 values.put("y", y);
                 values.put("z", z);
-                db.insert("AOG", "_id", values);
+                db.insert("GravA", "_id", values);
 
             }
             db.setTransactionSuccessful();
@@ -98,7 +98,7 @@ public class SqliteHelper extends SQLiteOpenHelper {
         db.endTransaction();
     }
 
-    public void addMagnetismBySw(ArrayList<Magnetism> list) {
+    public void addMagnetismBySw(ArrayList<Mag> list) {
         db.beginTransaction();
         try {
             String time;
@@ -114,7 +114,7 @@ public class SqliteHelper extends SQLiteOpenHelper {
                 values.put("x", x);
                 values.put("y", y);
                 values.put("z", z);
-                db.insert("Magnetism", "_id", values);
+                db.insert("Mag", "_id", values);
             }
             db.setTransactionSuccessful();
         } catch (SQLException e) {
@@ -123,7 +123,7 @@ public class SqliteHelper extends SQLiteOpenHelper {
         db.endTransaction();
     }
 
-    public void addPalstanceBySw(ArrayList<Palstance> list) {
+    public void addPalstanceBySw(ArrayList<AngV> list) {
         db.beginTransaction();
         try {
             String time;
@@ -139,7 +139,7 @@ public class SqliteHelper extends SQLiteOpenHelper {
                 values.put("x", x);
                 values.put("y", y);
                 values.put("z", z);
-                db.insert("Palstance", "_id", values);
+                db.insert("AngV", "_id", values);
 
             }
             db.setTransactionSuccessful();

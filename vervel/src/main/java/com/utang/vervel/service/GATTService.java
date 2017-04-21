@@ -21,14 +21,14 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 import java.util.List;
-
-import com.utang.vervel.beans.AOG;
+import com.utang.vervel.beans.AngV;
+import com.utang.vervel.beans.GravA;
 import com.utang.vervel.beans.DeviceStatusBean;
-import com.utang.vervel.beans.Magnetism;
-import com.utang.vervel.beans.Palstance;
+import com.utang.vervel.beans.Mag;
 import com.utang.vervel.beans.Pressure;
 import com.utang.vervel.beans.Pulse;
 import com.utang.vervel.beans.PulseBean;
+import com.utang.vervel.eventbean.EventNotification;
 import com.utang.vervel.thread.CommandPool;
 import com.utang.vervel.utils.ConstantPool;
 import com.utang.vervel.utils.DataUtils;
@@ -37,18 +37,14 @@ import com.utang.vervel.utils.EventUtil;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-
-
-
-
 /**
  * Created by Dell on 2017-4-16.
  */
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 public class GATTService extends Service {
 
-//    private String deviceName = "Nordic-FC0942090";//目标设备的名称，连接这个设备
-    private String deviceName = "Nordic-9FBEE5315";//目标设备的名称，连接这个设备
+    private String deviceName = "Nordic-FC0942090";//目标设备的名称，连接这个设备
+//    private String deviceName = "Nordic-9FBEE5315";//目标设备的名称，连接这个设备
     private BluetoothAdapter mBluetoothAdapter;
     private LeScanCallback_LOLLIPOP mScanCallBack_lollipop;//5.0以上
     private LeScanCallback_JELLY_BEAN mScanCallBack_jelly;//4.3以上
@@ -60,6 +56,7 @@ public class GATTService extends Service {
     private boolean mScanning;
     private BluetoothGattCharacteristic vibrationChar;
     private boolean isConnected = false;
+
 
     @Override
     public void onDestroy() {
@@ -188,11 +185,11 @@ public class GATTService extends Service {
                 //连上了新设备
                 commandPool = new CommandPool(GATTService.this, gatt);
                 new Thread(commandPool).start();
-                EventUtil.post("连接成功");
+                EventUtil.post(new EventNotification(deviceName,true));
                 Log.i("MSL", "Connected to GATT server 连接成功");
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 //设备断开
-                EventUtil.post("断开GATT连接");
+                EventUtil.post(new EventNotification(deviceName,false));
                 Log.i("MSL", "Disconnected from GATT server");
                 gatt.close();
                 stopSelf();
@@ -210,17 +207,13 @@ public class GATTService extends Service {
             if (serviceList != null) {
                 Log.i("MSL", "onServicesDiscovered: " + serviceList);
                 Log.i("MSL", "serviceList NUM ： " + serviceList.size());
-
                 for (BluetoothGattService bleService : serviceList) {
                     List<BluetoothGattCharacteristic> characteristicList = bleService.getCharacteristics();
                     Log.i("MSL", "扫描到Service: " + bleService.getUuid());
-
                     for (BluetoothGattCharacteristic characteristic :
                             characteristicList) {
                         Log.i("MSL", "characteristic: " + characteristic.getUuid() + "\n" + characteristic.getProperties());
-
                         if (characteristic.getUuid().equals(ConstantPool.UUID_NOTIFY)) {
-
                             Log.i("MSL", "onServicesDiscovered: " + characteristic.getUuid());
                             gatt.setCharacteristicNotification(characteristic, true);
                             List<BluetoothGattDescriptor> descriptorList = characteristic.getDescriptors();
@@ -231,7 +224,6 @@ public class GATTService extends Service {
                             }
 //                            descriptorList.get(0).setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
 //                            gatt.writeDescriptor(descriptorList.get(0));
-
                         }
                         if (characteristic.getUuid().equals(ConstantPool.UUID_WRITE)) {
                             vibrationChar = characteristic;
@@ -240,7 +232,6 @@ public class GATTService extends Service {
                 }
             }
         }
-
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             commandPool.onCommandCallbackComplete();
@@ -258,12 +249,10 @@ public class GATTService extends Service {
             if (characteristic.getUuid().equals(ConstantPool.UUID_NOTIFY)) {
                 commandPool.onCommandCallbackComplete();
                 byte[] data = characteristic.getValue();
-//                Log.d("MSL", "onCharacteristicChanged: " + DataUtils.bytes2hex(data));
+                Log.d("MSL", "onCharacteristicChanged: " + DataUtils.bytes2hex(data));
                 readData(data);
             }
-
         }
-
         @Override
         public void onDescriptorRead(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
 
@@ -295,7 +284,6 @@ public class GATTService extends Service {
             Log.d("MSL", "onMtuChanged: ");
         }
     }
-
     //MainActivity的btn控制这里
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void btnClick(String command) {
@@ -314,6 +302,8 @@ public class GATTService extends Service {
                 break;
             case "STOP GATT_SERVICE":
                 EventUtil.post("断开GATT连接");
+                EventUtil.post(new EventNotification(deviceName,false));
+                Log.i("MSL", "Disconnected from GATT server");
                 stopSelf();
 
                 break;
@@ -384,30 +374,30 @@ public class GATTService extends Service {
                     break;
 
                 case ConstantPool.INSTRUCT_SEARCH_AOG_HIS://返回：查询重力加速度历史
-                    AOG mAOG = new AOG();
-                    mAOG.setTime(timeInt);
-                    mAOG.setVelX(DataUtils.bytes2IntSigned(new byte[]{datas[0], datas[1]}));
-                    mAOG.setVelY(DataUtils.bytes2IntSigned(new byte[]{datas[2], datas[3]}));
-                    mAOG.setVelZ(DataUtils.bytes2IntSigned(new byte[]{datas[4], datas[5]}));
-                    EventUtil.post(mAOG);
+                    GravA mGravA = new GravA();
+                    mGravA.setTime(timeInt);
+                    mGravA.setVelX(DataUtils.bytes2IntSigned(new byte[]{datas[0], datas[1]}));
+                    mGravA.setVelY(DataUtils.bytes2IntSigned(new byte[]{datas[2], datas[3]}));
+                    mGravA.setVelZ(DataUtils.bytes2IntSigned(new byte[]{datas[4], datas[5]}));
+                    EventUtil.post(mGravA);
                     break;
 
                 case ConstantPool.INSTRUCT_SEARCH_PALSTANCE://返回：查询角速度历史
-                    Palstance palstance = new Palstance();
-                    palstance.setTime(timeInt);
-                    palstance.setVelX(DataUtils.bytes2IntSigned(new byte[]{datas[0], datas[1]}));
-                    palstance.setVelY(DataUtils.bytes2IntSigned(new byte[]{datas[2], datas[3]}));
-                    palstance.setVelZ(DataUtils.bytes2IntSigned(new byte[]{datas[4], datas[5]}));
-                    EventUtil.post(palstance);
+                    AngV angV = new AngV();
+                    angV.setTime(timeInt);
+                    angV.setVelX(DataUtils.bytes2IntSigned(new byte[]{datas[0], datas[1]}));
+                    angV.setVelY(DataUtils.bytes2IntSigned(new byte[]{datas[2], datas[3]}));
+                    angV.setVelZ(DataUtils.bytes2IntSigned(new byte[]{datas[4], datas[5]}));
+                    EventUtil.post(angV);
                     break;
 
                 case ConstantPool.INSTRUCT_SEARCH_MAGNETISM://返回：查询地磁历史
-                    Magnetism magnetism = new Magnetism();
-                    magnetism.setTime(timeInt);
-                    magnetism.setStrengthX(DataUtils.bytes2IntSigned(new byte[]{datas[0], datas[1]}));
-                    magnetism.setStrengthY(DataUtils.bytes2IntSigned(new byte[]{datas[2], datas[3]}));
-                    magnetism.setStrengthZ(DataUtils.bytes2IntSigned(new byte[]{datas[4], datas[5]}));
-                    EventUtil.post(magnetism);
+                    Mag mag = new Mag();
+                    mag.setTime(timeInt);
+                    mag.setStrengthX(DataUtils.bytes2IntSigned(new byte[]{datas[0], datas[1]}));
+                    mag.setStrengthY(DataUtils.bytes2IntSigned(new byte[]{datas[2], datas[3]}));
+                    mag.setStrengthZ(DataUtils.bytes2IntSigned(new byte[]{datas[4], datas[5]}));
+                    EventUtil.post(mag);
                     break;
 
                 case ConstantPool.INSTRUCT_SEARCH_PRESSURE://返回：查询气压历史

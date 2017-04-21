@@ -6,8 +6,8 @@ import android.os.Parcelable;
 /**
  * Created by user on 2017/4/7.
  */
-public class AOG implements Parcelable {
-    public AOG() {
+public class GravA implements Parcelable {
+    public GravA() {
     }
 
     private long time;
@@ -15,22 +15,22 @@ public class AOG implements Parcelable {
     private int velY;
     private int velZ;
 
-    protected AOG(Parcel in) {
+    protected GravA(Parcel in) {
         time = in.readLong();
         velX = in.readInt();
         velY = in.readInt();
         velZ = in.readInt();
     }
 
-    public static final Creator<AOG> CREATOR = new Creator<AOG>() {
+    public static final Creator<GravA> CREATOR = new Creator<GravA>() {
         @Override
-        public AOG createFromParcel(Parcel in) {
-            return new AOG(in);
+        public GravA createFromParcel(Parcel in) {
+            return new GravA(in);
         }
 
         @Override
-        public AOG[] newArray(int size) {
-            return new AOG[size];
+        public GravA[] newArray(int size) {
+            return new GravA[size];
         }
     };
 

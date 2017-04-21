@@ -6,31 +6,31 @@ import android.os.Parcelable;
 /**
  * Created by user on 2017/4/7.
  */
-public class Palstance implements Parcelable {
+public class AngV implements Parcelable {
     private long time;
     private int velX;
     private int velY;
     private int velZ;
 
-    public Palstance() {
+    public AngV() {
     }
 
-    protected Palstance(Parcel in) {
+    protected AngV(Parcel in) {
         time = in.readLong();
         velX = in.readInt();
         velY = in.readInt();
         velZ = in.readInt();
     }
 
-    public static final Creator<Palstance> CREATOR = new Creator<Palstance>() {
+    public static final Creator<AngV> CREATOR = new Creator<AngV>() {
         @Override
-        public Palstance createFromParcel(Parcel in) {
-            return new Palstance(in);
+        public AngV createFromParcel(Parcel in) {
+            return new AngV(in);
         }
 
         @Override
-        public Palstance[] newArray(int size) {
-            return new Palstance[size];
+        public AngV[] newArray(int size) {
+            return new AngV[size];
         }
     };
 

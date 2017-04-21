@@ -11,13 +11,14 @@ import com.utang.vervel.adapter.MyMagnetismDataAdapter;
 import com.utang.vervel.adapter.MyPalstanceDataAdapter;
 import com.utang.vervel.adapter.MyPressureDataAdapter;
 import com.utang.vervel.adapter.MyPulseDataAdapter;
-import com.utang.vervel.beans.AOG;
-import com.utang.vervel.beans.Magnetism;
-import com.utang.vervel.beans.Palstance;
+import com.utang.vervel.beans.AngV;
+import com.utang.vervel.beans.GravA;
+import com.utang.vervel.beans.Mag;
 import com.utang.vervel.beans.Pressure;
 import com.utang.vervel.beans.Pulse;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class SearchResultActivity extends AppCompatActivity {
 
@@ -51,22 +52,26 @@ public class SearchResultActivity extends AppCompatActivity {
                 tv_y.setVisibility(View.GONE);
                 tv_z.setVisibility(View.GONE);
                 ArrayList<Pulse> pulseArrayList = getIntent().getParcelableArrayListExtra("pulseArrayList");
+                Collections.reverse(pulseArrayList);
                 adapterPulse = new MyPulseDataAdapter(pulseArrayList, this);
                 list_result.setAdapter(adapterPulse);
                 break;
             case "AOGHis":
-                ArrayList<AOG> aogArrayList = getIntent().getParcelableArrayListExtra("aogArrayList");
-                adapterAOG = new MyAOGDataAdapter(aogArrayList, this);
+                ArrayList<GravA> gravAArrayList = getIntent().getParcelableArrayListExtra("gravAArrayList");
+                Collections.reverse(gravAArrayList);
+                adapterAOG = new MyAOGDataAdapter(gravAArrayList, this);
                 list_result.setAdapter(adapterAOG);
                 break;
-            case "Magnetism":
-                ArrayList<Magnetism> magnetismArrayList = getIntent().getParcelableArrayListExtra("magnetismArrayList");
-                adapterMagnetism = new MyMagnetismDataAdapter(magnetismArrayList, this);
+            case "Mag":
+                ArrayList<Mag> magArrayList = getIntent().getParcelableArrayListExtra("magArrayList");
+                Collections.reverse(magArrayList);
+                adapterMagnetism = new MyMagnetismDataAdapter(magArrayList, this);
                 list_result.setAdapter(adapterMagnetism);
                 break;
-            case "Palstance":
-                ArrayList<Palstance> palstanceArrayList = getIntent().getParcelableArrayListExtra("palstanceArrayList");
-                adapterPalstance = new MyPalstanceDataAdapter(palstanceArrayList, this);
+            case "AngV":
+                ArrayList<AngV> angVArrayList = getIntent().getParcelableArrayListExtra("angVArrayList");
+                Collections.reverse(angVArrayList);
+                adapterPalstance = new MyPalstanceDataAdapter(angVArrayList, this);
                 list_result.setAdapter(adapterPalstance);
                 break;
             case "Pressure":
@@ -74,6 +79,7 @@ public class SearchResultActivity extends AppCompatActivity {
                 tv_y.setVisibility(View.GONE);
                 tv_z.setVisibility(View.GONE);
                 ArrayList<Pressure> pressureArrayList = getIntent().getParcelableArrayListExtra("pressureArrayList");
+                Collections.reverse(pressureArrayList);
                 adapterPressure = new MyPressureDataAdapter(pressureArrayList, this);
                 list_result.setAdapter(adapterPressure);
                 break;

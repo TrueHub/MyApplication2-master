@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 import com.utang.vervel.R;
-import com.utang.vervel.beans.Magnetism;
+import com.utang.vervel.beans.Mag;
 import com.utang.vervel.utils.DateUtils;
 import java.util.ArrayList;
 
@@ -16,11 +16,11 @@ import java.util.ArrayList;
  */
 
 public class MyMagnetismDataAdapter extends BaseAdapter {
-    private ArrayList<Magnetism> list;
+    private ArrayList<Mag> list;
     private Context context;
     private LayoutInflater layoutInflater;
 
-    public MyMagnetismDataAdapter(ArrayList<Magnetism> list, Context context) {
+    public MyMagnetismDataAdapter(ArrayList<Mag> list, Context context) {
         this.list = list;
         this.context = context;
         this.layoutInflater = LayoutInflater.from(context);
@@ -51,7 +51,7 @@ public class MyMagnetismDataAdapter extends BaseAdapter {
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
-        Magnetism obj = list.get(position);
+        Mag obj = list.get(position);
         viewHolder.tv__result_time.setText(DateUtils.getDateToString(obj.getTime() * 1000));
         viewHolder.tv__result_x.setText(String.valueOf(obj.getStrengthX()));
         viewHolder.tv__result_y.setText(String.valueOf(obj.getStrengthY()));

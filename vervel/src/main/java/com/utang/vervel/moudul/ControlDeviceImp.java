@@ -4,9 +4,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.widget.Toast;
 
-import com.utang.vervel.beans.AOG;
-import com.utang.vervel.beans.Magnetism;
-import com.utang.vervel.beans.Palstance;
+import com.utang.vervel.beans.AngV;
+import com.utang.vervel.beans.GravA;
+import com.utang.vervel.beans.Mag;
 import com.utang.vervel.beans.Pressure;
 import com.utang.vervel.beans.Pulse;
 import com.utang.vervel.ui.SearchResultActivity;
@@ -33,22 +33,22 @@ public class ControlDeviceImp {
         context.startActivity(intentResult);
     }
 
-    public void searchAOG(ArrayList<AOG> aogArrayList) {
+    public void searchAOG(ArrayList<GravA> gravAArrayList) {
         intentResult.putExtra("instruct", "AOGHis");
-        intentResult.putParcelableArrayListExtra("aogArrayList", aogArrayList);
+        intentResult.putParcelableArrayListExtra("gravAArrayList", gravAArrayList);
         context.startActivity(intentResult);
 
     }
 
-    public void searchMagnetism(ArrayList<Magnetism> magnetismArrayList) {
-        intentResult.putExtra("instruct", "Magnetism");
-        intentResult.putParcelableArrayListExtra("magnetismArrayList", magnetismArrayList);
+    public void searchMagnetism(ArrayList<Mag> magArrayList) {
+        intentResult.putExtra("instruct", "Mag");
+        intentResult.putParcelableArrayListExtra("magArrayList", magArrayList);
         context.startActivity(intentResult);
     }
 
-    public void searchPalstance(ArrayList<Palstance> palstanceArrayList) {
-        intentResult.putExtra("instruct", "Palstance");
-        intentResult.putParcelableArrayListExtra("palstanceArrayList", palstanceArrayList);
+    public void searchPalstance(ArrayList<AngV> angVArrayList) {
+        intentResult.putExtra("instruct", "AngV");
+        intentResult.putParcelableArrayListExtra("angVArrayList", angVArrayList);
         context.startActivity(intentResult);
     }
 

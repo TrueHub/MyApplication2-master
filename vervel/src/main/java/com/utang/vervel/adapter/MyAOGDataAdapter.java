@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 import com.utang.vervel.R;
-import com.utang.vervel.beans.AOG;
+import com.utang.vervel.beans.GravA;
 import com.utang.vervel.utils.DateUtils;
 import java.util.ArrayList;
 import static android.content.ContentValues.TAG;
@@ -18,10 +18,10 @@ import static android.content.ContentValues.TAG;
  */
 
 public class MyAOGDataAdapter extends BaseAdapter {
-    private ArrayList<AOG> list;
+    private ArrayList<GravA> list;
     private LayoutInflater layoutInflater;
 
-    public MyAOGDataAdapter(ArrayList<AOG> list, Context context) {
+    public MyAOGDataAdapter(ArrayList<GravA> list, Context context) {
         this.list = list;
         this.layoutInflater = LayoutInflater.from(context);
     }
@@ -51,7 +51,7 @@ public class MyAOGDataAdapter extends BaseAdapter {
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
-        AOG obj = list.get(position);
+        GravA obj = list.get(position);
         Log.e(TAG, "getView: " + obj.getTime());
         viewHolder.tv__result_time.setText(DateUtils.getDateToString(obj.getTime() * 1000));
         viewHolder.tv__result_x.setText(String.valueOf(obj.getVelX()));

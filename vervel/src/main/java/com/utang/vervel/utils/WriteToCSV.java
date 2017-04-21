@@ -3,12 +3,16 @@ package com.utang.vervel.utils;
 import android.os.Environment;
 import android.util.Log;
 
-import com.utang.vervel.beans.AOG;
-import com.utang.vervel.beans.Magnetism;
-import com.utang.vervel.beans.Palstance;
+import com.google.gson.Gson;
+import com.utang.vervel.beans.AngV;
+import com.utang.vervel.beans.GravA;
+import com.utang.vervel.beans.Mag;
 import com.utang.vervel.beans.Pressure;
 import com.utang.vervel.beans.Pulse;
 import com.utang.vervel.beans.UserBean;
+import com.utang.vervel.beans.UserJsonBean;
+import com.utang.vervel.eventbean.EventNotification;
+import com.utang.vervel.net.RetrofitItfc;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -18,6 +22,14 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
 /**
  * Created by user on 2017/4/12.
  */
@@ -26,10 +38,48 @@ public class WriteToCSV {
 
     private static UserBean userBean = UserBean.getInstence();
 
-    public static void writeAOG(ArrayList<AOG> aoglist, String name) {
-        ArrayList<AOG> list = new ArrayList<>();
+    public static void writeGravA(ArrayList<GravA> aoglist, String name) {
+        ArrayList<GravA> list = new ArrayList<>();
         list.addAll(aoglist);
-        userBean.getAogArrayList().clear();
+        userBean.getGravAArrayList().clear();
+
+        UserJsonBean userJsonBean = new UserJsonBean();
+        userJsonBean.setGravAArrayList(list);
+        String userJson = new Gson().toJson(userBean);
+
+        Log.i("MSL", "writeToServer: " + userJson);
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://192.168.0.232:8080/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        RetrofitItfc retrofitItfc = retrofit.create(RetrofitItfc.class);
+
+        RequestBody requestBody = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), userJson);
+
+        Call<ResponseBody> call = retrofitItfc.postUser(requestBody);
+
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                try {
+                    Log.i("MSL", "onResponse: OK" + response.body().string());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                EventUtil.post("上传成功");
+
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.i("MSL", "onResponse: Fail" + t);
+                EventUtil.post("上传失败");
+            }
+        });
+
 
         if (!android.os.Environment.MEDIA_MOUNTED.equals(android.os.Environment.getExternalStorageState())) {//如果不存在SD卡,
             Log.e("SD卡管理：", "SD卡不存在，请加载SD卡");
@@ -37,18 +87,18 @@ public class WriteToCSV {
         String fileDir = Environment.getExternalStorageDirectory().getAbsolutePath();//SD卡根目录
         fileDir += "/vervel/csv";
         File dirFile = new File(fileDir);
-//        Log.e("MSL", "writeAOG: dirFile.exists() = " + dirFile.exists());
+//        Log.e("MSL", "writeGravA: dirFile.exists() = " + dirFile.exists());
         if (!dirFile.exists()) {
            boolean iss =  dirFile.mkdirs();
-//            Log.e("MSL", "writeAOG: filepath not exists,but i creat it :"  + iss);
+//            Log.e("MSL", "writeGravA: filepath not exists,but i creat it :"  + iss);
         }
 
         File aogFile = new File(fileDir + "/" + name);
-//        Log.e("MSL", "writeAOG: aogFile.exists() = " + aogFile.exists());
+//        Log.e("MSL", "writeGravA: aogFile.exists() = " + aogFile.exists());
         if (!aogFile.exists()) {
             try {
                 boolean creatResult = aogFile.createNewFile();
-                Log.e("MSL", "creat AOG File: " + creatResult);
+                Log.e("MSL", "creat GravA File: " + creatResult);
                 addToFileByFileWriter(aogFile.getAbsolutePath(), "time,x,y,z\n");
             } catch (IOException e) {
                 e.printStackTrace();
@@ -67,10 +117,47 @@ public class WriteToCSV {
         addToFileByFileWriter(aogFile.getAbsolutePath(), buffer.toString());
     }
 
-    public static void writePalstance(ArrayList<Palstance> palstancelist, String name) {
-        ArrayList<Palstance> list = new ArrayList<>();
+    public static void writeAngV(ArrayList<AngV> palstancelist, String name) {
+        ArrayList<AngV> list = new ArrayList<>();
         list.addAll(palstancelist);
-        userBean.getPalstanceArrayList().clear();
+        userBean.getAngVArrayList().clear();
+
+        UserJsonBean userJsonBean = new UserJsonBean();
+        userJsonBean.setAngVArrayList(list);
+        String userJson = new Gson().toJson(userBean);
+
+        Log.i("MSL", "writeToServer: " + userJson);
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://192.168.0.232:8080/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        RetrofitItfc retrofitItfc = retrofit.create(RetrofitItfc.class);
+
+        RequestBody requestBody = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), userJson);
+
+        Call<ResponseBody> call = retrofitItfc.postUser(requestBody);
+
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                try {
+                    Log.i("MSL", "onResponse: OK" + response.body().string());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                EventUtil.post("上传成功");
+
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.i("MSL", "onResponse: Fail" + t);
+                EventUtil.post("上传失败");
+            }
+        });
 
         if (!android.os.Environment.MEDIA_MOUNTED.equals(android.os.Environment.getExternalStorageState())) {//如果不存在SD卡,
             Log.e("SD卡管理：", "SD卡不存在，请加载SD卡");
@@ -103,10 +190,47 @@ public class WriteToCSV {
         addToFileByFileWriter(csvFile.getAbsolutePath(), buffer.toString());
     }
 
-    public static void writeMagnetism(ArrayList<Magnetism> MagnetismList, String name) {
-        ArrayList<Magnetism> list = new ArrayList<>();
-        list.addAll(MagnetismList);
-        userBean.getMagnetismArrayList().clear();
+    public static void writeMag(ArrayList<Mag> magList, String name) {
+        ArrayList<Mag> list = new ArrayList<>();
+        list.addAll(magList);
+        userBean.getMagArrayList().clear();
+
+        UserJsonBean userJsonBean = new UserJsonBean();
+        userJsonBean.setMagArrayList(list);
+        String userJson = new Gson().toJson(userBean);
+
+        Log.i("MSL", "writeToServer: " + userJson);
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://192.168.0.232:8080/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        RetrofitItfc retrofitItfc = retrofit.create(RetrofitItfc.class);
+
+        RequestBody requestBody = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), userJson);
+
+        Call<ResponseBody> call = retrofitItfc.postUser(requestBody);
+
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                try {
+                    Log.i("MSL", "onResponse: OK" + response.body().string());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                EventUtil.post("上传成功");
+
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.i("MSL", "onResponse: Fail" + t);
+                EventUtil.post("上传失败");
+            }
+        });
 
         if (!android.os.Environment.MEDIA_MOUNTED.equals(android.os.Environment.getExternalStorageState())) {//如果不存在SD卡,
             Log.e("SD卡管理：", "SD卡不存在，请加载SD卡");
@@ -144,6 +268,42 @@ public class WriteToCSV {
         list.addAll(PressureList);
         userBean.getPressureArrayList().clear();
 
+        UserJsonBean userJsonBean = new UserJsonBean();
+        userJsonBean.setPressureArrayList(list);
+        String userJson = new Gson().toJson(userBean);
+
+        Log.i("MSL", "writeToServer: " + userJson);
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://192.168.0.232:8080/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        RetrofitItfc retrofitItfc = retrofit.create(RetrofitItfc.class);
+
+        RequestBody requestBody = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), userJson);
+
+        Call<ResponseBody> call = retrofitItfc.postUser(requestBody);
+
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                try {
+                    Log.i("MSL", "onResponse: OK" + response.body().string());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                EventUtil.post("上传成功");
+
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.i("MSL", "onResponse: Fail" + t);
+                EventUtil.post("上传失败");
+            }
+        });
         if (!android.os.Environment.MEDIA_MOUNTED.equals(android.os.Environment.getExternalStorageState())) {//如果不存在SD卡,
             Log.e("SD卡管理：", "SD卡不存在，请加载SD卡");
         }
@@ -178,6 +338,42 @@ public class WriteToCSV {
         list.addAll(pulseArrayList);
         userBean.getPulseArrayList().clear();
 
+        UserJsonBean userJsonBean = new UserJsonBean();
+        userJsonBean.setPulseArrayList(list);
+        String userJson = new Gson().toJson(userBean);
+
+        Log.i("MSL", "writeToServer: " + userJson);
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://192.168.0.232:8080/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        RetrofitItfc retrofitItfc = retrofit.create(RetrofitItfc.class);
+
+        RequestBody requestBody = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), userJson);
+
+        Call<ResponseBody> call = retrofitItfc.postUser(requestBody);
+
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                try {
+                    Log.i("MSL", "onResponse: OK" + response.body().string());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                EventUtil.post("上传成功");
+
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.i("MSL", "onResponse: Fail" + t);
+                EventUtil.post("上传失败");
+            }
+        });
         if (!android.os.Environment.MEDIA_MOUNTED.equals(android.os.Environment.getExternalStorageState())) {//如果不存在SD卡,
             Log.e("SD卡管理：", "SD卡不存在，请加载SD卡");
         }

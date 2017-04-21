@@ -6,8 +6,8 @@ import android.os.Parcelable;
 /**
  * Created by user on 2017/4/7.
  */
-public class Magnetism implements Parcelable {
-    public Magnetism() {
+public class Mag implements Parcelable {
+    public Mag() {
     }
 
     private long time;
@@ -15,7 +15,7 @@ public class Magnetism implements Parcelable {
     private int strengthY;
     private int strengthZ;
 
-    protected Magnetism(Parcel in) {
+    protected Mag(Parcel in) {
         time = in.readLong();
         strengthX = in.readInt();
         strengthY = in.readInt();
@@ -35,15 +35,15 @@ public class Magnetism implements Parcelable {
         return 0;
     }
 
-    public static final Creator<Magnetism> CREATOR = new Creator<Magnetism>() {
+    public static final Creator<Mag> CREATOR = new Creator<Mag>() {
         @Override
-        public Magnetism createFromParcel(Parcel in) {
-            return new Magnetism(in);
+        public Mag createFromParcel(Parcel in) {
+            return new Mag(in);
         }
 
         @Override
-        public Magnetism[] newArray(int size) {
-            return new Magnetism[size];
+        public Mag[] newArray(int size) {
+            return new Mag[size];
         }
     };
 
