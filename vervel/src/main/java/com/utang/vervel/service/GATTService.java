@@ -291,8 +291,11 @@ public class GATTService extends Service {
             case "SEARCH_DEVICE_STATUE":
                 commandPool.addCommand(CommandPool.Type.write, ConstantPool.SEARCH_DEVICE_TIME, vibrationChar);
                 break;
-            case "SEARCH_PULSE":
-                commandPool.addCommand(CommandPool.Type.write, ConstantPool.SEARCH_PULSE, vibrationChar);
+            case "PULSE_UP_ON":
+                commandPool.addCommand(CommandPool.Type.write, ConstantPool.PULSE_UP_ON, vibrationChar);
+                break;
+            case "PULSE_UP_OFF":
+                commandPool.addCommand(CommandPool.Type.write, ConstantPool.PULSE_UP_OFF, vibrationChar);
                 break;
             case "SEARCH_HIS":
                 commandPool.addCommand(CommandPool.Type.write, ConstantPool.SEARCH_HIS, vibrationChar);

@@ -38,15 +38,9 @@ public class WriteToCSV {
 
     private static UserBean userBean = UserBean.getInstence();
 
-    public static void writeGravA(ArrayList<GravA> aoglist, String name) {
-        ArrayList<GravA> list = new ArrayList<>();
-        list.addAll(aoglist);
-        userBean.getGravAArrayList().clear();
 
-        UserJsonBean userJsonBean = new UserJsonBean();
-        userJsonBean.setGravAArrayList(list);
-        String userJson = new Gson().toJson(userJsonBean);
-
+    //和服务器交互：将数据以json的形式传到服务器中
+    private static void sendToService(String userJson){
         Log.i("MSL", "writeToServer: " + userJson);
 
         Retrofit retrofit = new Retrofit.Builder()
@@ -79,6 +73,18 @@ public class WriteToCSV {
                 EventUtil.post("上传失败");
             }
         });
+    }
+
+    public static void writeGravA(ArrayList<GravA> aoglist, String name) {
+        ArrayList<GravA> list = new ArrayList<>();
+        list.addAll(aoglist);
+        userBean.getGravAArrayList().clear();
+
+        UserJsonBean userJsonBean = new UserJsonBean();
+        userJsonBean.setGravAArrayList(list);
+        String userJson = new Gson().toJson(userJsonBean);
+
+        sendToService(userJson);
 
 
         if (!android.os.Environment.MEDIA_MOUNTED.equals(android.os.Environment.getExternalStorageState())) {//如果不存在SD卡,
@@ -126,38 +132,7 @@ public class WriteToCSV {
         userJsonBean.setAngVArrayList(list);
         String userJson = new Gson().toJson(userJsonBean);
 
-        Log.i("MSL", "writeToServer: " + userJson);
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(ConstantPool.BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        RetrofitItfc retrofitItfc = retrofit.create(RetrofitItfc.class);
-
-        RequestBody requestBody = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), userJson);
-
-        Call<ResponseBody> call = retrofitItfc.postUser(requestBody);
-
-        call.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                try {
-                    Log.i("MSL", "onResponse: OK" + response.body().string());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                EventUtil.post("上传成功");
-
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.i("MSL", "onResponse: Fail" + t);
-                EventUtil.post("上传失败");
-            }
-        });
+        sendToService(userJson);
 
         if (!android.os.Environment.MEDIA_MOUNTED.equals(android.os.Environment.getExternalStorageState())) {//如果不存在SD卡,
             Log.e("SD卡管理：", "SD卡不存在，请加载SD卡");
@@ -199,38 +174,7 @@ public class WriteToCSV {
         userJsonBean.setMagArrayList(list);
         String userJson = new Gson().toJson(userJsonBean);
 
-        Log.i("MSL", "writeToServer: " + userJson);
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(ConstantPool.BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        RetrofitItfc retrofitItfc = retrofit.create(RetrofitItfc.class);
-
-        RequestBody requestBody = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), userJson);
-
-        Call<ResponseBody> call = retrofitItfc.postUser(requestBody);
-
-        call.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                try {
-                    Log.i("MSL", "onResponse: OK" + response.body().string());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                EventUtil.post("上传成功");
-
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.i("MSL", "onResponse: Fail" + t);
-                EventUtil.post("上传失败");
-            }
-        });
+        sendToService(userJson);
 
         if (!android.os.Environment.MEDIA_MOUNTED.equals(android.os.Environment.getExternalStorageState())) {//如果不存在SD卡,
             Log.e("SD卡管理：", "SD卡不存在，请加载SD卡");
@@ -272,38 +216,8 @@ public class WriteToCSV {
         userJsonBean.setPressureArrayList(list);
         String userJson = new Gson().toJson(userJsonBean);
 
-        Log.i("MSL", "writeToServer: " + userJson);
+        sendToService(userJson);
 
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(ConstantPool.BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        RetrofitItfc retrofitItfc = retrofit.create(RetrofitItfc.class);
-
-        RequestBody requestBody = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), userJson);
-
-        Call<ResponseBody> call = retrofitItfc.postUser(requestBody);
-
-        call.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                try {
-                    Log.i("MSL", "onResponse: OK" + response.body().string());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                EventUtil.post("上传成功");
-
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.i("MSL", "onResponse: Fail" + t);
-                EventUtil.post("上传失败");
-            }
-        });
         if (!android.os.Environment.MEDIA_MOUNTED.equals(android.os.Environment.getExternalStorageState())) {//如果不存在SD卡,
             Log.e("SD卡管理：", "SD卡不存在，请加载SD卡");
         }
@@ -342,38 +256,8 @@ public class WriteToCSV {
         userJsonBean.setPulseArrayList(list);
         String userJson = new Gson().toJson(userJsonBean);
 
-        Log.i("MSL", "writeToServer: " + userJson);
+        sendToService(userJson);
 
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(ConstantPool.BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        RetrofitItfc retrofitItfc = retrofit.create(RetrofitItfc.class);
-
-        RequestBody requestBody = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), userJson);
-
-        Call<ResponseBody> call = retrofitItfc.postUser(requestBody);
-
-        call.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                try {
-                    Log.i("MSL", "onResponse: OK" + response.body().string());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                EventUtil.post("上传成功");
-
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.i("MSL", "onResponse: Fail" + t);
-                EventUtil.post("上传失败");
-            }
-        });
         if (!android.os.Environment.MEDIA_MOUNTED.equals(android.os.Environment.getExternalStorageState())) {//如果不存在SD卡,
             Log.e("SD卡管理：", "SD卡不存在，请加载SD卡");
         }

@@ -7,7 +7,9 @@ package com.utang.vervel.utils;
 
 public class ConstantPool {
     //baseURL
-    public static final String BASE_URL = "http://192.168.0.232:8080/";
+    public static final String BASE_URL = "http://192.168.0.141:8080/";//内网
+//    public static final String BASE_URL = "http://116.236.215.26:8000/";//外网
+
 
     //BluetoothProfile
     public static final  java.util.UUID UUID_NOTIFY  = java.util.UUID.fromString("6e400003-b5a3-f393-e0a9-e50e24dcca9e");
@@ -29,8 +31,13 @@ public class ConstantPool {
     public static final byte[] SEARCH_DEVICE_TIME = new byte[]
             {HEAD,(byte)0x02, INSTRUCT_SEARCH_TIME, END};//查询设备时间
 
-    public static final byte[] SEARCH_PULSE = new byte[]
-        {HEAD,(byte)0x02, (byte) 0x01,INSTRUCT_SEARCH_PULSE, END};//查询心率,实时心率上传 [2]：0x01:on || 0x02:off
+    public static final byte[] PULSE_UP_ON = new byte[]
+        {HEAD,(byte)0x02, (byte) 0x01,INSTRUCT_SEARCH_PULSE, END};//查询心率,实时心率上传 PULSE_UP_ON[2]：0x01:on || 0x02:off
+
+    public static final byte[] PULSE_UP_OFF = new byte[]
+            {HEAD,(byte)0x02, (byte) 0x02,INSTRUCT_SEARCH_PULSE, END};//查询心率,实时心率上传 PULSE_UP_ON[2]：0x01:on || 0x02:off
+
+
 
     public static final byte[] SEARCH_HIS = new byte[]
             {HEAD,(byte)0x02, INSTRUCT_HIS, END};//查询历史数据

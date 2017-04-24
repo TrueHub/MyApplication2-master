@@ -102,11 +102,19 @@
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
-        <Button
+        <TextView
             android:id="@+id/btn_search_pulse"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="实时心率"/>
+            android:text="实时心率上传开关："/>
+
+        <Switch
+            android:id="@+id/sw_pulse_upload"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textOn="开"
+            android:textOff="关"
+            />
 
         <TextView
             android:layout_width="wrap_content"

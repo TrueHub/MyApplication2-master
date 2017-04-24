@@ -13,6 +13,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,12 +41,13 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 
+import static com.utang.vervel.R.id.btn_search_pulse;
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private Button btn_connect;
     private Button btn_search_device;
     private Button btn_search_time;
-    private Button btn_search_pulse;
     private Button btn_search_pulse_his;
     private Button btn_search_AOG;
     private Button btn_search_palstance;
@@ -61,6 +64,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TextView tv_palstance_Y;
     private TextView tv_palstance_Z;
     private TextView tv_pressure;
+    private TextView tv_device_name;
+    private Switch sw_pulse_upload;
 
     private ControlDeviceImp controlDeviceImp;
 
@@ -98,7 +103,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button btn_delete_flash;
     private Intent gattService;
     private int LIST_SIZE = 100;
-    private TextView tv_device_name;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -147,7 +152,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btn_search_time = (Button) findViewById(R.id.btn_search_his);
         tv_phone_time = (TextView) findViewById(R.id.tv_phone_time);
         tv_device_time = (TextView) findViewById(R.id.tv_device_time);
-        btn_search_pulse = (Button) findViewById(R.id.btn_search_pulse);
         tv_pulse = (TextView) findViewById(R.id.tv_pulse);
         btn_search_pulse_his = (Button) findViewById(R.id.btn_search_pulse_his);
         btn_search_AOG = (Button) findViewById(R.id.btn_search_AOG);
@@ -164,7 +168,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btn_connect.setOnClickListener(this);
         btn_search_device.setOnClickListener(this);
         btn_search_time.setOnClickListener(this);
-        btn_search_pulse.setOnClickListener(this);
         btn_search_pulse_his.setOnClickListener(this);
         btn_search_AOG.setOnClickListener(this);
         btn_search_palstance.setOnClickListener(this);
@@ -188,6 +191,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btn_delete_flash.setOnClickListener(this);
         tv_device_name = (TextView) findViewById(R.id.tv_device_name);
         tv_device_name.setOnClickListener(this);
+        sw_pulse_upload = (Switch) findViewById(R.id.sw_pulse_upload);
+        sw_pulse_upload.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    EventUtil.post("PULSE_UP_ON");
+                }else{
+                    EventUtil.post("PULSE_UP_OFF");
+                    tv_trust_lv.setText("--");
+                    tv_pulse.setText("--次/分钟");
+                }
+            }
+        });
     }
 
     @Override
@@ -230,9 +246,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 btn_search_magnetism.setClickable(true);
                 btn_search_pressure.setClickable(true);
 
-                break;
-            case R.id.btn_search_pulse:
-                EventUtil.post("SEARCH_PULSE");
                 break;
             case R.id.btn_search_pulse_his:
                 controlDeviceImp.searchPulseHis(pulseArrayList);
