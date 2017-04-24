@@ -6,6 +6,9 @@ package com.utang.vervel.utils;
  */
 
 public class ConstantPool {
+    //baseURL
+    public static final String BASE_URL = "http://192.168.0.232:8080/";
+
     //BluetoothProfile
     public static final  java.util.UUID UUID_NOTIFY  = java.util.UUID.fromString("6e400003-b5a3-f393-e0a9-e50e24dcca9e");
     public static final  java.util.UUID UUID_WRITE  = java.util.UUID.fromString("6e400002-b5a3-f393-e0a9-e50e24dcca9e");
@@ -34,17 +37,4 @@ public class ConstantPool {
 
     public static final byte[] DELETE_FLASH = new byte[]
             {HEAD,(byte)0x02,INSTRUCT_DELETE_FLASH,END};//清缓存
-
-/*    public static final byte[] SEARCH_AOG_HIS = new byte[]
-            {HEAD,(byte)0x02, INSTRUCT_SEARCH_AOG_HIS, END};//查询重力加速度
-
-    public static final byte[] SEARCH_PALSTANCE = new byte[]
-            {HEAD,(byte)0x02, INSTRUCT_SEARCH_PALSTANCE, END};//查询角速度
-
-    public static final byte[] SEARCH_MAGNETISM = new byte[]
-            {HEAD,(byte)0x02, INSTRUCT_SEARCH_MAGNETISM, END};//查询地磁
-
-    public static final byte[] SEARCH_PRESSURE = new byte[]
-            {HEAD,(byte)0x02, INSTRUCT_SEARCH_PRESSURE, END};//查询压强*/
-
 }

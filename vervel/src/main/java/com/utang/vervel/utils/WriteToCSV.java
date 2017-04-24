@@ -45,12 +45,12 @@ public class WriteToCSV {
 
         UserJsonBean userJsonBean = new UserJsonBean();
         userJsonBean.setGravAArrayList(list);
-        String userJson = new Gson().toJson(userBean);
+        String userJson = new Gson().toJson(userJsonBean);
 
         Log.i("MSL", "writeToServer: " + userJson);
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://192.168.0.232:8080/")
+                .baseUrl(ConstantPool.BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
@@ -124,12 +124,12 @@ public class WriteToCSV {
 
         UserJsonBean userJsonBean = new UserJsonBean();
         userJsonBean.setAngVArrayList(list);
-        String userJson = new Gson().toJson(userBean);
+        String userJson = new Gson().toJson(userJsonBean);
 
         Log.i("MSL", "writeToServer: " + userJson);
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://192.168.0.232:8080/")
+                .baseUrl(ConstantPool.BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
@@ -197,12 +197,12 @@ public class WriteToCSV {
 
         UserJsonBean userJsonBean = new UserJsonBean();
         userJsonBean.setMagArrayList(list);
-        String userJson = new Gson().toJson(userBean);
+        String userJson = new Gson().toJson(userJsonBean);
 
         Log.i("MSL", "writeToServer: " + userJson);
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://192.168.0.232:8080/")
+                .baseUrl(ConstantPool.BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
@@ -270,12 +270,12 @@ public class WriteToCSV {
 
         UserJsonBean userJsonBean = new UserJsonBean();
         userJsonBean.setPressureArrayList(list);
-        String userJson = new Gson().toJson(userBean);
+        String userJson = new Gson().toJson(userJsonBean);
 
         Log.i("MSL", "writeToServer: " + userJson);
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://192.168.0.232:8080/")
+                .baseUrl(ConstantPool.BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
@@ -340,12 +340,12 @@ public class WriteToCSV {
 
         UserJsonBean userJsonBean = new UserJsonBean();
         userJsonBean.setPulseArrayList(list);
-        String userJson = new Gson().toJson(userBean);
+        String userJson = new Gson().toJson(userJsonBean);
 
         Log.i("MSL", "writeToServer: " + userJson);
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://192.168.0.232:8080/")
+                .baseUrl(ConstantPool.BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
