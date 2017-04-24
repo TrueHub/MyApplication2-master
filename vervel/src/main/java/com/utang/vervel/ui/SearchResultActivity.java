@@ -49,7 +49,7 @@ public class SearchResultActivity extends AppCompatActivity {
         switch (instruct) {
             case "PulseHis":
                 tv_x.setText("心率");
-                tv_y.setVisibility(View.GONE);
+                tv_y.setText("可信任等级");
                 tv_z.setVisibility(View.GONE);
                 ArrayList<Pulse> pulseArrayList = getIntent().getParcelableArrayListExtra("pulseArrayList");
                 Collections.reverse(pulseArrayList);
