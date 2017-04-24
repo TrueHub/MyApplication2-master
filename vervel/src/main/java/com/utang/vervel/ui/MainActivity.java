@@ -195,6 +195,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         sw_pulse_upload.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                Log.i("MSL", "onCheckedChanged: ");
                 if (isChecked) {
                     EventUtil.post("PULSE_UP_ON");
                 }else{
