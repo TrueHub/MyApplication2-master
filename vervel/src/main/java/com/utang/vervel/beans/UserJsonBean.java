@@ -16,13 +16,34 @@ public class UserJsonBean implements Parcelable {
     private ArrayList<AngV> angVArrayList = new ArrayList<>();
     private ArrayList<Pressure> pressureArrayList = new ArrayList<>();
     private ArrayList<Pulse> pulseArrayList = new ArrayList<>();
+    private String deviceId ;
 
-    public UserJsonBean(Parcel in) {
+    public UserJsonBean(String deviceId) {
+        this.deviceId = deviceId;
+    }
+
+    protected UserJsonBean(Parcel in) {
         gravAArrayList = in.createTypedArrayList(GravA.CREATOR);
         magArrayList = in.createTypedArrayList(Mag.CREATOR);
         angVArrayList = in.createTypedArrayList(AngV.CREATOR);
         pressureArrayList = in.createTypedArrayList(Pressure.CREATOR);
         pulseArrayList = in.createTypedArrayList(Pulse.CREATOR);
+        deviceId = in.readString();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeTypedList(gravAArrayList);
+        dest.writeTypedList(magArrayList);
+        dest.writeTypedList(angVArrayList);
+        dest.writeTypedList(pressureArrayList);
+        dest.writeTypedList(pulseArrayList);
+        dest.writeString(deviceId);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     public static final Creator<UserJsonBean> CREATOR = new Creator<UserJsonBean>() {
@@ -36,10 +57,6 @@ public class UserJsonBean implements Parcelable {
             return new UserJsonBean[size];
         }
     };
-
-    public UserJsonBean() {
-
-    }
 
     public ArrayList<GravA> getGravAArrayList() {
         return gravAArrayList;
@@ -81,17 +98,11 @@ public class UserJsonBean implements Parcelable {
         this.pulseArrayList = pulseArrayList;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
+    public String getDeviceId() {
+        return deviceId;
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeTypedList(gravAArrayList);
-        dest.writeTypedList(magArrayList);
-        dest.writeTypedList(angVArrayList);
-        dest.writeTypedList(pressureArrayList);
-        dest.writeTypedList(pulseArrayList);
+    public void setDeviceId(String deviceId) {
+        this.deviceId = deviceId;
     }
 }

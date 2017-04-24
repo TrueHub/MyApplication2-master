@@ -43,8 +43,6 @@ import org.greenrobot.eventbus.ThreadMode;
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 public class GATTService extends Service {
 
-    private String deviceName = "Nordic-FC0942090";//目标设备的名称，连接这个设备
-//    private String deviceName = "Nordic-9FBEE5315";//目标设备的名称，连接这个设备
     private BluetoothAdapter mBluetoothAdapter;
     private LeScanCallback_LOLLIPOP mScanCallBack_lollipop;//5.0以上
     private LeScanCallback_JELLY_BEAN mScanCallBack_jelly;//4.3以上
@@ -140,7 +138,7 @@ public class GATTService extends Service {
 
             EventUtil.post(result.getDevice());
 
-            if (result.getDevice().getName() != null && deviceName.equals(result.getDevice().getName())) {
+            if (result.getDevice().getName() != null && ConstantPool.DEVICEID.equals(result.getDevice().getName())) {
                 mTarget = result.getDevice();
                 if (!isConnected) {
                     mTarget.connectGatt(GATTService.this, false, mGattCallback);
@@ -159,7 +157,7 @@ public class GATTService extends Service {
 
         @Override
         public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
-            if (device.getName() != null && device.getName().equals(deviceName)) {
+            if (device.getName() != null && device.getName().equals(ConstantPool.DEVICEID)) {
                 mTarget =device;
                 if (!isConnected) {
                     mTarget.connectGatt(GATTService.this,false,mGattCallback);
@@ -185,11 +183,11 @@ public class GATTService extends Service {
                 //连上了新设备
                 commandPool = new CommandPool(GATTService.this, gatt);
                 new Thread(commandPool).start();
-                EventUtil.post(new EventNotification(deviceName,true));
+                EventUtil.post(new EventNotification(ConstantPool.DEVICEID,true));
                 Log.i("MSL", "Connected to GATT server 连接成功");
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 //设备断开
-                EventUtil.post(new EventNotification(deviceName,false));
+                EventUtil.post(new EventNotification(ConstantPool.DEVICEID,false));
                 Log.i("MSL", "Disconnected from GATT server");
                 gatt.close();
                 stopSelf();
@@ -305,7 +303,7 @@ public class GATTService extends Service {
                 break;
             case "STOP GATT_SERVICE":
                 EventUtil.post("断开GATT连接");
-                EventUtil.post(new EventNotification(deviceName,false));
+                EventUtil.post(new EventNotification(ConstantPool.DEVICEID,false));
                 Log.i("MSL", "Disconnected from GATT server");
                 stopSelf();
 

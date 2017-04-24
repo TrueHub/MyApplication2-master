@@ -80,7 +80,7 @@ public class WriteToCSV {
         list.addAll(aoglist);
         userBean.getGravAArrayList().clear();
 
-        UserJsonBean userJsonBean = new UserJsonBean();
+        UserJsonBean userJsonBean = new UserJsonBean(ConstantPool.DEVICEID);
         userJsonBean.setGravAArrayList(list);
         String userJson = new Gson().toJson(userJsonBean);
 
@@ -128,7 +128,7 @@ public class WriteToCSV {
         list.addAll(palstancelist);
         userBean.getAngVArrayList().clear();
 
-        UserJsonBean userJsonBean = new UserJsonBean();
+        UserJsonBean userJsonBean = new UserJsonBean(ConstantPool.DEVICEID);
         userJsonBean.setAngVArrayList(list);
         String userJson = new Gson().toJson(userJsonBean);
 
@@ -170,7 +170,7 @@ public class WriteToCSV {
         list.addAll(magList);
         userBean.getMagArrayList().clear();
 
-        UserJsonBean userJsonBean = new UserJsonBean();
+        UserJsonBean userJsonBean = new UserJsonBean(ConstantPool.DEVICEID);
         userJsonBean.setMagArrayList(list);
         String userJson = new Gson().toJson(userJsonBean);
 
@@ -212,7 +212,7 @@ public class WriteToCSV {
         list.addAll(PressureList);
         userBean.getPressureArrayList().clear();
 
-        UserJsonBean userJsonBean = new UserJsonBean();
+        UserJsonBean userJsonBean = new UserJsonBean(ConstantPool.DEVICEID);
         userJsonBean.setPressureArrayList(list);
         String userJson = new Gson().toJson(userJsonBean);
 
@@ -252,7 +252,7 @@ public class WriteToCSV {
         list.addAll(pulseArrayList);
         userBean.getPulseArrayList().clear();
 
-        UserJsonBean userJsonBean = new UserJsonBean();
+        UserJsonBean userJsonBean = new UserJsonBean(ConstantPool.DEVICEID);
         userJsonBean.setPulseArrayList(list);
         String userJson = new Gson().toJson(userJsonBean);
 

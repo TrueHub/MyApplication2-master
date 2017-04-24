@@ -10,8 +10,11 @@ public class ConstantPool {
     public static final String BASE_URL = "http://192.168.0.141:8080/";//内网
 //    public static final String BASE_URL = "http://116.236.215.26:8000/";//外网
 
+    public static final String DEVICEID = "Nordic-FC0942090";
+    //    public static final String DEVICEID = "Nordic-9FBEE5315";
 
     //BluetoothProfile
+
     public static final  java.util.UUID UUID_NOTIFY  = java.util.UUID.fromString("6e400003-b5a3-f393-e0a9-e50e24dcca9e");
     public static final  java.util.UUID UUID_WRITE  = java.util.UUID.fromString("6e400002-b5a3-f393-e0a9-e50e24dcca9e");
 
@@ -44,4 +47,5 @@ public class ConstantPool {
 
     public static final byte[] DELETE_FLASH = new byte[]
             {HEAD,(byte)0x02,INSTRUCT_DELETE_FLASH,END};//清缓存
+
 }
