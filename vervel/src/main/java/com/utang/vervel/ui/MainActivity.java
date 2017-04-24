@@ -328,6 +328,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btn_connect.setText("连接");
         tv_device_status.setText("---请先获取设备状态---");
 
+        sw_pulse_upload.setChecked(false);
+
         tv_device_time.setText("----年-月-日-时-分-秒");
 
         tv_pulse.setText("--次/分钟");

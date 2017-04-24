@@ -18,12 +18,10 @@ import java.util.ArrayList;
 
 public class MyPulseDataAdapter extends BaseAdapter {
     private ArrayList<Pulse> list;
-    private Context context;
     private LayoutInflater layoutInflater;
 
     public MyPulseDataAdapter(ArrayList<Pulse> list, Context context) {
         this.list = list;
-        this.context = context;
         this.layoutInflater = LayoutInflater.from(context);
     }
 
@@ -55,19 +53,19 @@ public class MyPulseDataAdapter extends BaseAdapter {
         Pulse obj = list.get(position);
         viewHolder.tv__result_time.setText(DateUtils.getDateToString(obj.getTime() * 1000));
         viewHolder.tv__result_x.setText(String.valueOf(obj.getPulse()));
-        viewHolder.tv__result_y.setVisibility(View.GONE);
+        viewHolder.tv__result_y.setText(String.valueOf(obj.getTrustLevel()));
         viewHolder.tv__result_z.setVisibility(View.GONE);
         return convertView;
     }
 
-    public static class ViewHolder {
-        public View rootView;
-        public TextView tv__result_time;
-        public TextView tv__result_x;
-        public TextView tv__result_y;
-        public TextView tv__result_z;
+    private static class ViewHolder {
+        private View rootView;
+        private TextView tv__result_time;
+        private TextView tv__result_x;
+        private TextView tv__result_y;
+        private TextView tv__result_z;
 
-        public ViewHolder(View rootView) {
+        private ViewHolder(View rootView) {
             this.rootView = rootView;
             this.tv__result_time = (TextView) rootView.findViewById(R.id.tv__result_time);
             this.tv__result_x = (TextView) rootView.findViewById(R.id.tv__result_x);
