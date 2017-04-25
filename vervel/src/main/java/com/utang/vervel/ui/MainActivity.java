@@ -31,6 +31,7 @@ import com.utang.vervel.eventbean.EventNotification;
 import com.utang.vervel.moudul.ControlDeviceImp;
 import com.utang.vervel.service.GATTService;
 import com.utang.vervel.service.WriteService;
+import com.utang.vervel.utils.ConstantPool;
 import com.utang.vervel.utils.DateUtils;
 import com.utang.vervel.utils.EventUtil;
 import com.utang.vervel.utils.RequestPermissionUtils;
@@ -95,6 +96,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     ArrayList<Mag> magArrayList = new ArrayList<>();
     ArrayList<Pressure> pressureArrayList = new ArrayList<>();
     ArrayList<GravA> gravAArrayList = new ArrayList<>();
+    ArrayList<AngV> angVList = new ArrayList<>();
+    ArrayList<Pulse> pulseList = new ArrayList<>();
+    ArrayList<Mag> magList = new ArrayList<>();
+    ArrayList<Pressure> pressureList = new ArrayList<>();
+    ArrayList<GravA> gravAList = new ArrayList<>();
     ArrayList<AngV> angVArrayList = new ArrayList<>();
     private UserBean userBean;
     private Intent writeServiceIntent;
@@ -103,6 +109,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button btn_delete_flash;
     private Intent gattService;
     private int LIST_SIZE = 100;
+    private boolean getDataEnd;//接收完数据，将小于100的list也存储和上传
 
 
     @Override
@@ -239,6 +246,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.btn_search_his:
 
+                getDataEnd = false;
                 EventUtil.post("SEARCH_HIS");
 
                 btn_search_pulse_his.setClickable(true);
@@ -249,19 +257,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 break;
             case R.id.btn_search_pulse_his:
-                controlDeviceImp.searchPulseHis(pulseArrayList);
+                controlDeviceImp.searchPulseHis(pulseList);
                 break;
             case R.id.btn_search_AOG:
-                controlDeviceImp.searchAOG(gravAArrayList);
+                controlDeviceImp.searchAOG(gravAList);
                 break;
             case R.id.btn_search_palstance:
-                controlDeviceImp.searchPalstance(angVArrayList);
+                controlDeviceImp.searchPalstance(angVList);
                 break;
             case R.id.btn_search_magnetism:
-                controlDeviceImp.searchMagnetism(magArrayList);
+                controlDeviceImp.searchMagnetism(magList);
                 break;
             case R.id.btn_search_pressure:
-                controlDeviceImp.searchPressure(pressureArrayList);
+                controlDeviceImp.searchPressure(pressureList);
                 break;
             case R.id.btn_delete_flash:
                 showMessageOKCancel(this, "确定要清空蓝牙设备里量测好的数据吗？（会丢失部分数据） 请确认已经接受完所有数据！！", new DialogInterface.OnClickListener() {
@@ -310,14 +318,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void getDataOver(EventNotification eventNotification) {
-        if (eventNotification.isGetOver()) {
-            controlDeviceImp.showToast("连接" + eventNotification.getType() + "成功");
-            tv_device_name.setVisibility(View.VISIBLE);
-            tv_device_name.setText(eventNotification.getType());
-            btn_connect.setText("断开");
-        } else {
-            initAll();
+        switch (eventNotification.getType()) {
+            case  "HIS_DATA":
+                    getDataEnd = eventNotification.isGetOver();
+                 break;
+            case ConstantPool.DEVICEID:
+                if (eventNotification.isGetOver()) {
+                    controlDeviceImp.showToast("连接" + eventNotification.getType() + "成功");
+                    tv_device_name.setVisibility(View.VISIBLE);
+                    tv_device_name.setText(eventNotification.getType());
+                    btn_connect.setText("断开");
+                } else {
+                    initAll();
+                }
+                break;
         }
+
     }
 
     /**
@@ -356,7 +372,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void getGATTCallback(PulseBean pulseBean) {
+    public void getGATTCallback(PulseBean pulseBean) {//实时心率
         tv_pulse.setText(pulseBean.getPulse() + "次/分钟");
         switch (pulseBean.getTrustLevel()) {
             case 0:
@@ -396,7 +412,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public synchronized void getGATTCallback(Pulse pulse) {
         //心率历史
         pulseArrayList.add(pulse);
-        if (pulseArrayList.size() == LIST_SIZE) {
+        //添加到另一个list，用于传到searchResultActivity中本地显示最近的数据
+        pulseList.add(pulse);
+        if (pulseList.size() > 100) {
+            pulseList.remove(0);
+        }
+
+        if (pulseArrayList.size() == LIST_SIZE || getDataEnd) {
+
             ArrayList<Pulse> list = new ArrayList<>();
             list.addAll(pulseArrayList);
             userBean.setPulseArrayList(list);
@@ -429,7 +452,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public synchronized void getGATTCallback(GravA gravA) {
         //心率历史
         gravAArrayList.add(gravA);
-        if (gravAArrayList.size() == LIST_SIZE) {
+        gravAList.add(gravA);
+        if (gravAList.size() > 100) {
+            gravAList.remove(0);
+        }
+        if (gravAArrayList.size() == LIST_SIZE || getDataEnd) {
             ArrayList<GravA> list = new ArrayList<>();
             list.addAll(gravAArrayList);
             userBean.setGravAArrayList(list);
@@ -446,7 +473,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public synchronized void getGATTCallback(AngV angV) {
         //心率历史
         angVArrayList.add(angV);
-        if (angVArrayList.size() == LIST_SIZE) {
+        angVList.add(angV);
+        if (angVList.size() > 100) {
+            angVList.remove(0);
+        }
+        if (angVArrayList.size() == LIST_SIZE|| getDataEnd) {
             ArrayList<AngV> list = new ArrayList<>();
             list.addAll(angVArrayList);
             userBean.setAngVArrayList(list);
@@ -463,7 +494,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public synchronized void getGATTCallback(Mag mag) {
         //心率历史
         magArrayList.add(mag);
-        if (magArrayList.size() == LIST_SIZE) {
+        magList.add(mag);
+        if (magList.size() > 100) {
+            magList.remove(0);
+        }
+        if (magArrayList.size() == LIST_SIZE || getDataEnd) {
             ArrayList<Mag> list = new ArrayList<>();
             list.addAll(magArrayList);
             userBean.setMagArrayList(list);
@@ -480,7 +515,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public synchronized void getGATTCallback(Pressure pressure) {
         //心率历史
         pressureArrayList.add(pressure);
-        if (pressureArrayList.size() == LIST_SIZE) {
+        pressureList.add(pressure);
+        if (pressureList.size() > 100) {
+            pressureList.remove(0);
+        }
+        if (pressureArrayList.size() == LIST_SIZE || getDataEnd) {
             ArrayList<Pressure> list = new ArrayList<>();
             list.addAll(pressureArrayList);
             userBean.setPressureArrayList(list);

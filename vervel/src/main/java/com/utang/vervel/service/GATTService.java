@@ -54,7 +54,7 @@ public class GATTService extends Service {
     private boolean mScanning;
     private BluetoothGattCharacteristic vibrationChar;
     private boolean isConnected = false;
-
+    private boolean canDeleteFlash = true;
 
     @Override
     public void onDestroy() {
@@ -297,6 +297,7 @@ public class GATTService extends Service {
                 break;
             case "SEARCH_HIS":
                 commandPool.addCommand(CommandPool.Type.write, ConstantPool.SEARCH_HIS, vibrationChar);
+                canDeleteFlash = true;
                 break;
             case "START CONNECT":
                 searchDevice();
@@ -311,6 +312,7 @@ public class GATTService extends Service {
             case "DELETE FLASH":
                 Log.i("MSL", "指令：清除设备的flash缓存");
                 commandPool.addCommand(CommandPool.Type.write,ConstantPool.DELETE_FLASH,vibrationChar);
+                EventUtil.post(new EventNotification("HIS_DATA",true));
                 break;
         }
     }
@@ -323,7 +325,6 @@ public class GATTService extends Service {
             Log.i("MSL", " data长度：" + data.length + ",分别为：" + b);
         }
 */
-
         if (data[1] == ConstantPool.INSTRUCT_SET_TIME) {//返回：设定时间成功
             EventUtil.post("SET_TIME_SUCCESS!");
             commandPool.addCommand(CommandPool.Type.write, ConstantPool.SEARCH_DEVICE_TIME, vibrationChar);
@@ -332,6 +333,7 @@ public class GATTService extends Service {
             EventUtil.post(new PulseBean(DataUtils.byte2Int(data[3]),DataUtils.byte2Int(data[4])));
         } else if (data[2] == ConstantPool.INSTRUCT_DELETE_FLASH) {//清除flash数据成功
             EventUtil.post("已清除设备内flash数据");
+
         }else {
             int length = DataUtils.byte2Int(data[1]);//设备返回的数据长度
 
@@ -339,8 +341,10 @@ public class GATTService extends Service {
             System.arraycopy(data,3,timeBytes,0,timeBytes.length);
             int timeInt = DataUtils.bytes2IntUnsigned(timeBytes);//这里的timeInt是秒级别的
 
-            if (!needSetTime(timeInt) && data[2] != ConstantPool.INSTRUCT_SEARCH_TIME) {
+            if (!needSetTime(timeInt) && data[2] != ConstantPool.INSTRUCT_SEARCH_TIME && canDeleteFlash) {//接收完截至到当前的数据
                 commandPool.addCommand(CommandPool.Type.write,ConstantPool.DELETE_FLASH,vibrationChar);
+                EventUtil.post(new EventNotification("HIS_DATA",true));
+                canDeleteFlash = false;
             }
 //            Log.i("MSL", "readData: " + timeInt);
             byte[] datas = null;//除去数据长度、指令、时间 之后的数组

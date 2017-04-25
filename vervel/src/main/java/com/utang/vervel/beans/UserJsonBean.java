@@ -22,7 +22,7 @@ public class UserJsonBean implements Parcelable {
         this.deviceId = deviceId;
     }
 
-    protected UserJsonBean(Parcel in) {
+    private UserJsonBean(Parcel in) {
         gravAArrayList = in.createTypedArrayList(GravA.CREATOR);
         magArrayList = in.createTypedArrayList(Mag.CREATOR);
         angVArrayList = in.createTypedArrayList(AngV.CREATOR);

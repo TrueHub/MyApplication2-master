@@ -10,8 +10,8 @@ public class ConstantPool {
     public static final String BASE_URL = "http://192.168.0.141:8080/";//内网
 //    public static final String BASE_URL = "http://116.236.215.26:8000/";//外网
 
-    public static final String DEVICEID = "Nordic-FC0942090";
-    //    public static final String DEVICEID = "Nordic-9FBEE5315";
+//    public static final String DEVICEID = "Nordic-FC0942090";
+        public static final String DEVICEID = "Nordic-9FBEE5315";
 
     //BluetoothProfile
 

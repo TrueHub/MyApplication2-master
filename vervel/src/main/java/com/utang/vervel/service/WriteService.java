@@ -37,7 +37,7 @@ public class WriteService extends Service {
     }
 
     private UserBean userBean;
-    private final int DATA_SIZE = 100;
+    private final int DATA_SIZE = 1;
 
     @Override
     public IBinder onBind(Intent intent) {

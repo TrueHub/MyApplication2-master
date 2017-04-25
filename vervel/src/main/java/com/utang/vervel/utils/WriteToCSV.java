@@ -86,7 +86,6 @@ public class WriteToCSV {
 
         sendToService(userJson);
 
-
         if (!android.os.Environment.MEDIA_MOUNTED.equals(android.os.Environment.getExternalStorageState())) {//如果不存在SD卡,
             Log.e("SD卡管理：", "SD卡不存在，请加载SD卡");
         }
