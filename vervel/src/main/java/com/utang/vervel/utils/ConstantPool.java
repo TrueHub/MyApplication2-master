@@ -1,20 +1,15 @@
 package com.utang.vervel.utils;
 
+import android.app.Application;
+
 /**
  * Created by user on 2017/4/6.
  * 有关设备的常量池
  */
 
 public class ConstantPool {
-    //baseURL
-    public static final String BASE_URL = "http://192.168.0.141:8080/";//内网
-//    public static final String BASE_URL = "http://116.236.215.26:8000/";//外网
-
-//    public static final String DEVICEID = "Nordic-FC0942090";
-        public static final String DEVICEID = "Nordic-9FBEE5315";
 
     //BluetoothProfile
-
     public static final  java.util.UUID UUID_NOTIFY  = java.util.UUID.fromString("6e400003-b5a3-f393-e0a9-e50e24dcca9e");
     public static final  java.util.UUID UUID_WRITE  = java.util.UUID.fromString("6e400002-b5a3-f393-e0a9-e50e24dcca9e");
 
@@ -35,17 +30,24 @@ public class ConstantPool {
             {HEAD,(byte)0x02, INSTRUCT_SEARCH_TIME, END};//查询设备时间
 
     public static final byte[] PULSE_UP_ON = new byte[]
-        {HEAD,(byte)0x02, (byte) 0x01,INSTRUCT_SEARCH_PULSE, END};//查询心率,实时心率上传 PULSE_UP_ON[2]：0x01:on || 0x02:off
+        {HEAD,(byte)0x02, (byte) 0x01,INSTRUCT_SEARCH_PULSE, END};//实时心率上传开关 PULSE_UP_ON[2]：0x01:on || 0x02:off
 
     public static final byte[] PULSE_UP_OFF = new byte[]
-            {HEAD,(byte)0x02, (byte) 0x02,INSTRUCT_SEARCH_PULSE, END};//查询心率,实时心率上传 PULSE_UP_ON[2]：0x01:on || 0x02:off
-
-
+            {HEAD,(byte)0x02, (byte) 0x02,INSTRUCT_SEARCH_PULSE, END};//实时心率上传开关 PULSE_UP_ON[2]：0x01:on || 0x02:off
 
     public static final byte[] SEARCH_HIS = new byte[]
             {HEAD,(byte)0x02, INSTRUCT_HIS, END};//查询历史数据
 
     public static final byte[] DELETE_FLASH = new byte[]
             {HEAD,(byte)0x02,INSTRUCT_DELETE_FLASH,END};//清缓存
+
+    public static final String DEVICEID_1 = "Nordic-FC0942090";
+    public static final String DEVICEID_2 = "Nordic-9FBEE5315";
+
+    public static String debugWifiName = "linux.utang.cn-puppet";
+    public static String debugWifiMac = "04:bd:70:da:1b:d0";
+
+    public static String URL_DEBUG_LAN = "http://192.168.0.141:8080/";
+    public static String URL_DEBUG_WLAN = "http://116.236.215.26:8000/";
 
 }

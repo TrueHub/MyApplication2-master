@@ -131,8 +131,8 @@ public class CommandPool implements Runnable{
             this.target = target;
             this.type = type;
             id = index;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2)
-                Log.i("MSL",index + "命令创建，UUID: " + target.getUuid().toString());
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2)
+//                Log.i("MSL",index + "命令创建，UUID: " + target.getUuid().toString());
             index++;
 
         }

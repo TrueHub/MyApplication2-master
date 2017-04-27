@@ -20,7 +20,9 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
+
 import java.util.List;
+
 import com.utang.vervel.beans.AngV;
 import com.utang.vervel.beans.GravA;
 import com.utang.vervel.beans.DeviceStatusBean;
@@ -43,6 +45,8 @@ import org.greenrobot.eventbus.ThreadMode;
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 public class GATTService extends Service {
 
+    public static final String DEVICE_ID = ConstantPool.DEVICEID_1;
+
     private BluetoothAdapter mBluetoothAdapter;
     private LeScanCallback_LOLLIPOP mScanCallBack_lollipop;//5.0以上
     private LeScanCallback_JELLY_BEAN mScanCallBack_jelly;//4.3以上
@@ -54,7 +58,8 @@ public class GATTService extends Service {
     private boolean mScanning;
     private BluetoothGattCharacteristic vibrationChar;
     private boolean isConnected = false;
-    private boolean canDeleteFlash = true;
+    private int cameCount = 0;
+    private BluetoothGatt mGatt;
 
     @Override
     public void onDestroy() {
@@ -101,11 +106,13 @@ public class GATTService extends Service {
         if (mGattCallback == null) mGattCallback = new BLEGATTCallBack();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {//5.0以上
-            if (mScanCallBack_lollipop == null) mScanCallBack_lollipop = new LeScanCallback_LOLLIPOP();
+            if (mScanCallBack_lollipop == null)
+                mScanCallBack_lollipop = new LeScanCallback_LOLLIPOP();
             mBluetoothScanner = mBluetoothAdapter.getBluetoothLeScanner();
             mBluetoothScanner.startScan(mScanCallBack_lollipop);
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {//4.3 ~ 5.0
-            if (mScanCallBack_lollipop == null) mScanCallBack_jelly = new LeScanCallback_JELLY_BEAN();
+            if (mScanCallBack_lollipop == null)
+                mScanCallBack_jelly = new LeScanCallback_JELLY_BEAN();
             mBluetoothAdapter.startLeScan(mScanCallBack_jelly);
 
         }
@@ -138,7 +145,7 @@ public class GATTService extends Service {
 
             EventUtil.post(result.getDevice());
 
-            if (result.getDevice().getName() != null && ConstantPool.DEVICEID.equals(result.getDevice().getName())) {
+            if (result.getDevice().getName() != null && DEVICE_ID.equals(result.getDevice().getName())) {
                 mTarget = result.getDevice();
                 if (!isConnected) {
                     mTarget.connectGatt(GATTService.this, false, mGattCallback);
@@ -157,10 +164,10 @@ public class GATTService extends Service {
 
         @Override
         public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
-            if (device.getName() != null && device.getName().equals(ConstantPool.DEVICEID)) {
-                mTarget =device;
+            if (device.getName() != null && device.getName().equals(DEVICE_ID)) {
+                mTarget = device;
                 if (!isConnected) {
-                    mTarget.connectGatt(GATTService.this,false,mGattCallback);
+                    mTarget.connectGatt(GATTService.this, false, mGattCallback);
                     isConnected = true;
                 }
                 mBluetoothAdapter.stopLeScan(mScanCallBack_jelly);
@@ -173,23 +180,25 @@ public class GATTService extends Service {
     }
 
     private class BLEGATTCallBack extends BluetoothGattCallback {
+
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             super.onConnectionStateChange(gatt, status, newState);
+            mGatt = gatt;
             if (status == 0) {
-                gatt.discoverServices();
+                mGatt.discoverServices();
             }
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 //连上了新设备
                 commandPool = new CommandPool(GATTService.this, gatt);
                 new Thread(commandPool).start();
-                EventUtil.post(new EventNotification(ConstantPool.DEVICEID,true));
+                EventUtil.post(new EventNotification(DEVICE_ID, true));
                 Log.i("MSL", "Connected to GATT server 连接成功");
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 //设备断开
-                EventUtil.post(new EventNotification(ConstantPool.DEVICEID,false));
+                EventUtil.post(new EventNotification(DEVICE_ID, false));
                 Log.i("MSL", "Disconnected from GATT server");
-                gatt.close();
+                mGatt.close();
                 stopSelf();
             }
         }
@@ -230,6 +239,7 @@ public class GATTService extends Service {
                 }
             }
         }
+
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             commandPool.onCommandCallbackComplete();
@@ -243,14 +253,14 @@ public class GATTService extends Service {
 
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
-//            Log.i("MSL", "onCharacteristicChanged: ");
             if (characteristic.getUuid().equals(ConstantPool.UUID_NOTIFY)) {
                 commandPool.onCommandCallbackComplete();
                 byte[] data = characteristic.getValue();
-                Log.d("MSL", "onCharacteristicChanged: " + DataUtils.bytes2hex(data));
+//                Log.d("MSL", "onCharacteristicChanged: " + DataUtils.bytes2hex(data));
                 readData(data);
             }
         }
+
         @Override
         public void onDescriptorRead(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
 
@@ -282,6 +292,7 @@ public class GATTService extends Service {
             Log.d("MSL", "onMtuChanged: ");
         }
     }
+
     //MainActivity的btn控制这里
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void btnClick(String command) {
@@ -297,27 +308,27 @@ public class GATTService extends Service {
                 break;
             case "SEARCH_HIS":
                 commandPool.addCommand(CommandPool.Type.write, ConstantPool.SEARCH_HIS, vibrationChar);
-                canDeleteFlash = true;
+                cameCount = 0;
                 break;
             case "START CONNECT":
                 searchDevice();
                 break;
             case "STOP GATT_SERVICE":
                 EventUtil.post("断开GATT连接");
-                EventUtil.post(new EventNotification(ConstantPool.DEVICEID,false));
+                EventUtil.post(new EventNotification(DEVICE_ID, false));
                 Log.i("MSL", "Disconnected from GATT server");
-                stopSelf();
+                mGatt.disconnect();
 
                 break;
             case "DELETE FLASH":
                 Log.i("MSL", "指令：清除设备的flash缓存");
-                commandPool.addCommand(CommandPool.Type.write,ConstantPool.DELETE_FLASH,vibrationChar);
-                EventUtil.post(new EventNotification("HIS_DATA",true));
+                commandPool.addCommand(CommandPool.Type.write, ConstantPool.DELETE_FLASH, vibrationChar);
+                EventUtil.post(new EventNotification("HIS_DATA", true));
                 break;
         }
     }
 
-    public void readData(byte[] data) throws NullPointerException{
+    public void readData(byte[] data) throws NullPointerException {
 /*
 
         for (byte b : data
@@ -330,27 +341,30 @@ public class GATTService extends Service {
             commandPool.addCommand(CommandPool.Type.write, ConstantPool.SEARCH_DEVICE_TIME, vibrationChar);
 
         } else if (data[2] == ConstantPool.INSTRUCT_SEARCH_PULSE) {//返回：查询心率
-            EventUtil.post(new PulseBean(DataUtils.byte2Int(data[3]),DataUtils.byte2Int(data[4])));
+            EventUtil.post(new PulseBean(DataUtils.byte2Int(data[3]), DataUtils.byte2Int(data[4])));
         } else if (data[2] == ConstantPool.INSTRUCT_DELETE_FLASH) {//清除flash数据成功
             EventUtil.post("已清除设备内flash数据");
 
-        }else {
+        } else {
             int length = DataUtils.byte2Int(data[1]);//设备返回的数据长度
 
             byte[] timeBytes = new byte[4];//时间数组
-            System.arraycopy(data,3,timeBytes,0,timeBytes.length);
+            System.arraycopy(data, 3, timeBytes, 0, timeBytes.length);
             int timeInt = DataUtils.bytes2IntUnsigned(timeBytes);//这里的timeInt是秒级别的
+//            Log.i("MSL", "readData: " + timeInt +","+ System.currentTimeMillis() / 1000);
 
-            if (!needSetTime(timeInt) && data[2] != ConstantPool.INSTRUCT_SEARCH_TIME && canDeleteFlash) {//接收完截至到当前的数据
-                commandPool.addCommand(CommandPool.Type.write,ConstantPool.DELETE_FLASH,vibrationChar);
-                EventUtil.post(new EventNotification("HIS_DATA",true));
-                canDeleteFlash = false;
+            if (getDataEnd(timeInt) && data[2] != ConstantPool.INSTRUCT_SEARCH_TIME) {//接收完截至到当前的数据
+                cameCount ++;
+                Log.d("MSL", "readData: " + cameCount) ;
+                if (cameCount == 1) {
+                    commandPool.addCommand(CommandPool.Type.write, ConstantPool.DELETE_FLASH, vibrationChar);
+                    EventUtil.post(new EventNotification("HIS_DATA", true));
+                }
             }
-//            Log.i("MSL", "readData: " + timeInt);
             byte[] datas = null;//除去数据长度、指令、时间 之后的数组
             if (length > 5) {
                 datas = new byte[length - 5];
-                System.arraycopy(data,7,datas,0,datas.length);
+                System.arraycopy(data, 7, datas, 0, datas.length);
             }
 
             switch (data[2]) {
@@ -425,7 +439,7 @@ public class GATTService extends Service {
         /*for (int i = 0; i < currentTimeBytes.length; i++) {
             setTimeBytes[i + 3] = currentTimeBytes[i];
         }*/
-        System.arraycopy(currentTimeBytes,0,setTimeBytes,3,currentTimeBytes.length);
+        System.arraycopy(currentTimeBytes, 0, setTimeBytes, 3, currentTimeBytes.length);
         setTimeBytes[setTimeBytes.length - 1] = ConstantPool.END;
         commandPool.addCommand(CommandPool.Type.write, setTimeBytes, vibrationChar);
     }
@@ -433,7 +447,13 @@ public class GATTService extends Service {
     private boolean needSetTime(int time) {
         int current = (int) (System.currentTimeMillis() / 1000);
 //        Log.d("MSL", "needSetTime: " + current + "," + time);
-        return Math.abs(time - current) > 1;
+        return Math.abs(time - current) >= 1;
+    }
+
+    private boolean getDataEnd(int time) {
+        int current = (int) (System.currentTimeMillis() / 1000);
+//        Log.d("MSL", "needSetTime: " + current + "," + time);
+        return current - time == 9 ;//因为删flash需要10s以上，所以这里定义9即可
     }
 
 }

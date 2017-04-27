@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 
 /**
@@ -13,18 +14,17 @@ import java.util.TimeZone;
 public class DateUtils {
 
     private static SimpleDateFormat sf = null;
-    private static SimpleDateFormat sdf;
 
     /*获取系统时间 格式为："yyyy/MM/dd "*/
     public static String getCurrentDate() {
         Date d = new Date();
-        sf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        sf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",Locale.CHINA);
         return sf.format(d);
     }
 
     /*时间戳转换成字符窜*/
     public static String getDateToString(long time) {
-        sf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        sf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
         Date d = new Date(time);
         return sf.format(d);
     }
@@ -32,7 +32,7 @@ public class DateUtils {
 
     /*将字符串转为时间戳*/
     public static long getStringToDate(String time) {
-        sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",Locale.CHINA);
         Date date = new Date();
         try {
             date = sdf.parse(time);
@@ -44,8 +44,8 @@ public class DateUtils {
 
     /**
      * 传入一个long型的time，比较与现在时间的差异
-     * @param diff
-     * @return
+     * @param diff 相差毫秒数
+     * @return r
      */
     public static String getSubTimeFromLong(long diff) {
         diff -= System.currentTimeMillis();

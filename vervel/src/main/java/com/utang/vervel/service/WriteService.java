@@ -1,41 +1,29 @@
 package com.utang.vervel.service;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.net.wifi.WifiManager;
 import android.os.IBinder;
+import android.text.TextUtils;
 import android.util.Log;
 
-import com.google.gson.Gson;
 import com.utang.vervel.beans.UserBean;
-import com.utang.vervel.beans.UserJsonBean;
 import com.utang.vervel.dbUtils.DataBaseContext;
 import com.utang.vervel.dbUtils.SqliteHelper;
-import com.utang.vervel.eventbean.EventNotification;
-import com.utang.vervel.net.RetrofitItfc;
-import com.utang.vervel.utils.EventUtil;
+import com.utang.vervel.utils.ConstantPool;
 import com.utang.vervel.utils.WriteToCSV;
-
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
-
-import java.io.IOException;
-import java.util.ArrayList;
-
-import okhttp3.RequestBody;
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * 将数据写入本地 (sqlite3 & csv) 的service
  */
 public class WriteService extends Service {
+    private String url;
+
     public WriteService() {
     }
 
+    private WriteToCSV writeToCSV ;
     private UserBean userBean;
     private final int DATA_SIZE = 1;
 
@@ -48,6 +36,7 @@ public class WriteService extends Service {
     public void onCreate() {
         super.onCreate();
         userBean = UserBean.getInstence();
+//        url = ConstantPool.URL_DEBUG_LAN;
         Log.i("MSL", "onCreate: write service");
         new Thread() {
             @Override
@@ -59,24 +48,31 @@ public class WriteService extends Service {
 
 //                    存储为本地csv文件,两种存储方式不能同时处理(list.clear()的原因)
                     writeByCsv();
-
-//                    writeToServer();
                 }
             }
         }.start();
-
-
     }
-
-    private void writeToServer(ArrayList<Object> objList) {
-
-
-
-    }
-
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        String net = intent.getStringExtra("net");
+        Log.d("MSL", "onStartCommand: 当前net：" + net);
+        if (net.equals("mobile")) {
+            url = ConstantPool.URL_DEBUG_WLAN;
+        }else if (net.equals("wifi")){
+            if (TextUtils.isEmpty(intent.getStringExtra("wifiName")) || TextUtils.isEmpty(intent.getStringExtra("wifiMac"))){
+                url = ConstantPool.URL_DEBUG_WLAN;
+            }
+            Log.d("MSL", "onStartCommand: " + intent.getStringExtra("wifiName") + "," + intent.getStringExtra("wifiMac"));
+            String wifiName = intent.getStringExtra("wifiName");
+            String wifiMac = intent.getStringExtra("wifiMac");
+            Log.i("MSL", "onStartCommand: " + wifiName + "," + wifiMac);
+            if (!wifiName.equals(ConstantPool.debugWifiName) || !wifiMac.equals(ConstantPool.debugWifiMac))
+                url = ConstantPool.URL_DEBUG_LAN;
+            else
+                url = ConstantPool.URL_DEBUG_WLAN;
+        }
+        writeToCSV = new WriteToCSV(url);
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -84,19 +80,19 @@ public class WriteService extends Service {
 
 
         if (userBean.getGravAArrayList().size() >= DATA_SIZE) {
-            WriteToCSV.writeGravA(userBean.getGravAArrayList(), "GravA.csv");
+            writeToCSV.writeGravA(userBean.getGravAArrayList(), "GravA.csv");
         }
         if (userBean.getMagArrayList().size() >= DATA_SIZE) {
-            WriteToCSV.writeMag(userBean.getMagArrayList(), "Mag.csv");
+            writeToCSV.writeMag(userBean.getMagArrayList(), "Mag.csv");
         }
         if (userBean.getAngVArrayList().size() >= DATA_SIZE) {
-            WriteToCSV.writeAngV(userBean.getAngVArrayList(), "AngV.csv");
+            writeToCSV.writeAngV(userBean.getAngVArrayList(), "AngV.csv");
         }
         if (userBean.getPressureArrayList().size() >= DATA_SIZE) {
-            WriteToCSV.writePressure(userBean.getPressureArrayList(), "Pressure.csv");
+            writeToCSV.writePressure(userBean.getPressureArrayList(), "Pressure.csv");
         }
         if (userBean.getPulseArrayList().size() >= DATA_SIZE) {
-            WriteToCSV.writePulse(userBean.getPulseArrayList(), "Pulse.csv");
+            writeToCSV.writePulse(userBean.getPulseArrayList(), "Pulse.csv");
         }
     }
 

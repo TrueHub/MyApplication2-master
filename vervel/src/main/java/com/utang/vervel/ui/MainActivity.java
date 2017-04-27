@@ -2,12 +2,19 @@ package com.utang.vervel.ui;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Parcelable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -28,21 +35,20 @@ import com.utang.vervel.beans.Pulse;
 import com.utang.vervel.beans.PulseBean;
 import com.utang.vervel.beans.UserBean;
 import com.utang.vervel.eventbean.EventNotification;
+import com.utang.vervel.eventbean.NetWorkEventBean;
 import com.utang.vervel.moudul.ControlDeviceImp;
 import com.utang.vervel.service.GATTService;
 import com.utang.vervel.service.WriteService;
-import com.utang.vervel.utils.ConstantPool;
 import com.utang.vervel.utils.DateUtils;
 import com.utang.vervel.utils.EventUtil;
 import com.utang.vervel.utils.RequestPermissionUtils;
 import com.utang.vervel.utils.ServiceUtils;
+import com.utang.vervel.utils.WIFIUtils;
 
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
-
-import static com.utang.vervel.R.id.btn_search_pulse;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -54,6 +60,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button btn_search_palstance;
     private Button btn_search_magnetism;
     private Button btn_search_pressure;
+    private Button btn_delete_flash;
+    private TextView tv_getdata_his_time;
+    private TextView tv_pulse_his;
+    private TextView tv_magnetism_X;
+    private TextView tv_magnetism_Y;
+    private TextView tv_magnetism_Z;
+    private TextView tv_trust_lv;
+    private TextView tv_trust_lv_his;
     private TextView tv_device_status;
     private TextView tv_phone_time;
     private TextView tv_device_time;
@@ -66,10 +80,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TextView tv_palstance_Z;
     private TextView tv_pressure;
     private TextView tv_device_name;
+
     private Switch sw_pulse_upload;
 
     private ControlDeviceImp controlDeviceImp;
-
     private Handler handler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
@@ -85,13 +99,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     });
     private Runnable runnable_time;
-    private TextView tv_getdata_his_time;
-    private TextView tv_pulse_his;
-    private TextView tv_magnetism_X;
-    private TextView tv_magnetism_Y;
-    private TextView tv_magnetism_Z;
     private Toast toast;
     private boolean isStarted;
+    private Intent gattService;
     ArrayList<Pulse> pulseArrayList = new ArrayList<>();
     ArrayList<Mag> magArrayList = new ArrayList<>();
     ArrayList<Pressure> pressureArrayList = new ArrayList<>();
@@ -104,13 +114,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     ArrayList<AngV> angVArrayList = new ArrayList<>();
     private UserBean userBean;
     private Intent writeServiceIntent;
-    private TextView tv_trust_lv;
-    private TextView tv_trust_lv_his;
-    private Button btn_delete_flash;
-    private Intent gattService;
     private int LIST_SIZE = 100;
     private boolean getDataEnd;//接收完数据，将小于100的list也存储和上传
-
+    private static boolean isWifiState;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,6 +149,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         };
         new Thread(runnable_time).start();
+
+        if (WIFIUtils.GetNetype(this)) {
+            isWifiState = true ;
+            controlDeviceImp.showToast("当前连接：" + WIFIUtils.getWifiId((WifiManager) getSystemService(Context.WIFI_SERVICE)));
+        }
     }
 
     private void requestMyPermissions() {
@@ -205,7 +216,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Log.i("MSL", "onCheckedChanged: ");
                 if (isChecked) {
                     EventUtil.post("PULSE_UP_ON");
-                }else{
+                } else {
                     EventUtil.post("PULSE_UP_OFF");
                     tv_trust_lv.setText("--");
                     tv_pulse.setText("--次/分钟");
@@ -227,8 +238,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         gattService = new Intent(this, GATTService.class);
                         startService(gattService);
                         writeServiceIntent = new Intent(this, WriteService.class);
+                        if (isWifiState) {
+                            writeServiceIntent.putExtra("net", "wifi");
+                            writeServiceIntent.putExtra("wifiName", WIFIUtils.getWifiId((WifiManager) getSystemService(Context.WIFI_SERVICE)));
+                            writeServiceIntent.putExtra("wifiMac", WIFIUtils.getWifiMAC((WifiManager) getSystemService(Context.WIFI_SERVICE)));
+                        } else {
+                            writeServiceIntent.putExtra("net", "mobile");
+                        }
                         startService(writeServiceIntent);
                         Log.e("MSL", "onClick: gatt is not running");
+                        btn_delete_flash.setClickable(true);
                     }
                 } else if (btn_connect.getText().equals("断开")) {
                     EventUtil.post("STOP GATT_SERVICE");
@@ -245,8 +264,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 EventUtil.post("SEARCH_DEVICE_STATUE");
                 break;
             case R.id.btn_search_his:
-
+                Log.d("MSL", "onClick: 网络是否wifi状态：" + isWifiState);
+                if (isWifiState) {
+                    writeServiceIntent.putExtra("net", "wifi");
+                    writeServiceIntent.putExtra("wifiName", WIFIUtils.getWifiId((WifiManager) getSystemService(Context.WIFI_SERVICE)));
+                    writeServiceIntent.putExtra("wifiMac", WIFIUtils.getWifiMAC((WifiManager) getSystemService(Context.WIFI_SERVICE)));
+                } else {
+                    writeServiceIntent.putExtra("net", "mobile");
+                }
+                startService(writeServiceIntent);
                 getDataEnd = false;
+
+
+
                 EventUtil.post("SEARCH_HIS");
 
                 btn_search_pulse_his.setClickable(true);
@@ -312,17 +342,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void getGATTCallback(String str) {
-        controlDeviceImp.showToast(str);
-    }
+        switch (str) {
+            case "上传成功":
 
+                break;
+            default:
+                controlDeviceImp.showToast(str);
+                break;
+        }
+    }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void getDataOver(EventNotification eventNotification) {
         switch (eventNotification.getType()) {
-            case  "HIS_DATA":
-                    getDataEnd = eventNotification.isGetOver();
-                 break;
-            case ConstantPool.DEVICEID:
+            case "HIS_DATA":
+                getDataEnd = eventNotification.isGetOver();
+                break;
+            case GATTService.DEVICE_ID:
                 if (eventNotification.isGetOver()) {
                     controlDeviceImp.showToast("连接" + eventNotification.getType() + "成功");
                     tv_device_name.setVisibility(View.VISIBLE);
@@ -477,7 +513,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (angVList.size() > 100) {
             angVList.remove(0);
         }
-        if (angVArrayList.size() == LIST_SIZE|| getDataEnd) {
+        if (angVArrayList.size() == LIST_SIZE || getDataEnd) {
             ArrayList<AngV> list = new ArrayList<>();
             list.addAll(angVArrayList);
             userBean.setAngVArrayList(list);
@@ -545,4 +581,61 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
     }
+
+
+    public static class NetWorkStateChangedReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // TODO: This method is called when the BroadcastReceiver is receiving
+            // an Intent broadcast.
+            switch (intent.getAction()) {
+                case WifiManager.WIFI_STATE_CHANGED_ACTION:
+                    int wifiState = intent.getIntExtra(WifiManager.WIFI_STATE_CHANGED_ACTION, 0);
+                    switch (wifiState) {
+                        case WifiManager.WIFI_STATE_DISABLED:
+                            Log.i("MSL", "onReceive: WIFI_STATE_DISABLED");
+                            break;
+                        case WifiManager.WIFI_STATE_DISABLING:
+                            Log.i("MSL", "onReceive: WIFI_STATE_DISABLING");
+                            break;
+                        case WifiManager.WIFI_STATE_ENABLED:
+                            Log.i("MSL", "onReceive: WIFI_STATE_ENABLED");
+                            break;
+                    }
+                    break;
+                case WifiManager.NETWORK_STATE_CHANGED_ACTION:
+                    Parcelable intentParcelabe = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+                    if (intentParcelabe == null) break;
+
+                    NetworkInfo.State state = ((NetworkInfo) intentParcelabe).getState();
+
+                    if (state == NetworkInfo.State.CONNECTED) {
+                        Log.i("MSL", "onReceive: √√ wifi可用");
+                    } else {
+                        Log.i("MSL", "onReceive: !! wifi不可用");
+                    }
+                    break;
+                case ConnectivityManager.CONNECTIVITY_ACTION:
+                    NetworkInfo networkInfo = intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
+                    if (networkInfo == null) break;
+                    if (networkInfo.getState() != NetworkInfo.State.CONNECTED || !networkInfo.isAvailable())
+                        break;
+                    switch (networkInfo.getType()) {
+                        case ConnectivityManager.TYPE_WIFI:
+                            Log.i("MSL", "onReceive: 连接上wifi");
+                            isWifiState = true;
+                            break;
+                        case ConnectivityManager.TYPE_MOBILE:
+                            Log.i("MSL", "onReceive: 当前使用移动数据");
+                            isWifiState = false;
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+            }
+        }
+    }
+
 }

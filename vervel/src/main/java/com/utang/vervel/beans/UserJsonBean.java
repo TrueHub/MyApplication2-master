@@ -31,6 +31,10 @@ public class UserJsonBean implements Parcelable {
         deviceId = in.readString();
     }
 
+    public UserJsonBean() {
+
+    }
+
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeTypedList(gravAArrayList);

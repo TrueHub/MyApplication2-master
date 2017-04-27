@@ -1,5 +1,6 @@
 package com.utang.vervel.utils;
 
+import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
 
@@ -11,8 +12,8 @@ import com.utang.vervel.beans.Pressure;
 import com.utang.vervel.beans.Pulse;
 import com.utang.vervel.beans.UserBean;
 import com.utang.vervel.beans.UserJsonBean;
-import com.utang.vervel.eventbean.EventNotification;
 import com.utang.vervel.net.RetrofitItfc;
+import com.utang.vervel.service.GATTService;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -35,16 +36,20 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 
 public class WriteToCSV {
+    public WriteToCSV(String url) {
+        this.url = url;
+    }
 
-    private static UserBean userBean = UserBean.getInstence();
+    private  UserBean userBean = UserBean.getInstence();
 
+    private  String url ;
 
     //和服务器交互：将数据以json的形式传到服务器中
-    private static void sendToService(String userJson){
+    private  void sendToService(final String userJson){
         Log.i("MSL", "writeToServer: " + userJson);
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(ConstantPool.BASE_URL)
+                .baseUrl(url)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
@@ -57,30 +62,31 @@ public class WriteToCSV {
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                try {
+                /*try {
                     Log.i("MSL", "onResponse: OK" + response.body().string());
                 } catch (IOException e) {
                     e.printStackTrace();
-                }
-
+                }*/
                 EventUtil.post("上传成功");
 
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.i("MSL", "onResponse: Fail" + t);
+                Log.e("MSL", "onResponse: Fail" + t );
                 EventUtil.post("上传失败");
+
+                //需求：上传失败时，将未上传的数据存为tmp，等待有网络可上传时再次上传
             }
         });
     }
 
-    public static void writeGravA(ArrayList<GravA> aoglist, String name) {
+    public void writeGravA(ArrayList<GravA> aoglist, String name) {
         ArrayList<GravA> list = new ArrayList<>();
         list.addAll(aoglist);
         userBean.getGravAArrayList().clear();
 
-        UserJsonBean userJsonBean = new UserJsonBean(ConstantPool.DEVICEID);
+        UserJsonBean userJsonBean = new UserJsonBean(GATTService.DEVICE_ID);
         userJsonBean.setGravAArrayList(list);
         String userJson = new Gson().toJson(userJsonBean);
 
@@ -94,7 +100,7 @@ public class WriteToCSV {
         File dirFile = new File(fileDir);
 //        Log.e("MSL", "writeGravA: dirFile.exists() = " + dirFile.exists());
         if (!dirFile.exists()) {
-           boolean iss =  dirFile.mkdirs();
+            boolean iss =  dirFile.mkdirs();
 //            Log.e("MSL", "writeGravA: filepath not exists,but i creat it :"  + iss);
         }
 
@@ -114,6 +120,10 @@ public class WriteToCSV {
             String time;
             int x, y, z;
             time = DateUtils.getDateToString(list.get(i).getTime() * 1000);
+            if (time.length() != "2017-04-26 11:17:17".length()){
+                Log.e("MSL", "writeAngV: " + time );
+                continue;
+            }
             x = list.get(i).getVelX();
             y = list.get(i).getVelY();
             z = list.get(i).getVelZ();
@@ -122,12 +132,12 @@ public class WriteToCSV {
         addToFileByFileWriter(aogFile.getAbsolutePath(), buffer.toString());
     }
 
-    public static void writeAngV(ArrayList<AngV> palstancelist, String name) {
+    public  void writeAngV(ArrayList<AngV> palstancelist, String name) {
         ArrayList<AngV> list = new ArrayList<>();
         list.addAll(palstancelist);
         userBean.getAngVArrayList().clear();
 
-        UserJsonBean userJsonBean = new UserJsonBean(ConstantPool.DEVICEID);
+        UserJsonBean userJsonBean = new UserJsonBean(GATTService.DEVICE_ID);
         userJsonBean.setAngVArrayList(list);
         String userJson = new Gson().toJson(userJsonBean);
 
@@ -156,6 +166,10 @@ public class WriteToCSV {
             String time;
             int x, y, z;
             time = DateUtils.getDateToString(list.get(i).getTime() * 1000);
+            if (time.length() != "2017-04-26 11:17:17".length()){
+                Log.e("MSL", "writeAngV: " + time );
+                continue;
+            }
             x = list.get(i).getVelX();
             y = list.get(i).getVelY();
             z = list.get(i).getVelZ();
@@ -164,12 +178,12 @@ public class WriteToCSV {
         addToFileByFileWriter(csvFile.getAbsolutePath(), buffer.toString());
     }
 
-    public static void writeMag(ArrayList<Mag> magList, String name) {
+    public  void writeMag(ArrayList<Mag> magList, String name) {
         ArrayList<Mag> list = new ArrayList<>();
         list.addAll(magList);
         userBean.getMagArrayList().clear();
 
-        UserJsonBean userJsonBean = new UserJsonBean(ConstantPool.DEVICEID);
+        UserJsonBean userJsonBean = new UserJsonBean(GATTService.DEVICE_ID);
         userJsonBean.setMagArrayList(list);
         String userJson = new Gson().toJson(userJsonBean);
 
@@ -198,6 +212,10 @@ public class WriteToCSV {
             String time;
             int x, y, z;
             time = DateUtils.getDateToString(list.get(i).getTime() * 1000);
+            if (time.length() != "2017-04-26 11:17:17".length()){
+                Log.e("MSL", "writeAngV: " + time );
+                continue;
+            }
             x = list.get(i).getStrengthX();
             y = list.get(i).getStrengthY();
             z = list.get(i).getStrengthZ();
@@ -206,12 +224,12 @@ public class WriteToCSV {
         addToFileByFileWriter(csvFile.getAbsolutePath(), buffer.toString());
     }
 
-    public static void writePressure(ArrayList<Pressure> PressureList, String name) {
+    public  void writePressure(ArrayList<Pressure> PressureList, String name) {
         ArrayList<Pressure> list = new ArrayList<>();
         list.addAll(PressureList);
         userBean.getPressureArrayList().clear();
 
-        UserJsonBean userJsonBean = new UserJsonBean(ConstantPool.DEVICEID);
+        UserJsonBean userJsonBean = new UserJsonBean(GATTService.DEVICE_ID);
         userJsonBean.setPressureArrayList(list);
         String userJson = new Gson().toJson(userJsonBean);
 
@@ -240,18 +258,22 @@ public class WriteToCSV {
             String time;
             long pressure;
             time = DateUtils.getDateToString(list.get(i).getTime() * 1000);
+            if (time.length() != "2017-04-26 11:17:17".length()){
+                Log.e("MSL", "writeAngV: " + time );
+                continue;
+            }
             pressure = list.get(i).getIntensityOfPressure();
             buffer.append(time).append(",").append(pressure).append("\n");
         }
         addToFileByFileWriter(csvFile.getAbsolutePath(), buffer.toString());
     }
 
-    public static void writePulse(ArrayList<Pulse> pulseArrayList, String name) {
+    public  void writePulse(ArrayList<Pulse> pulseArrayList, String name) {
         ArrayList<Pulse> list = new ArrayList<>();
         list.addAll(pulseArrayList);
         userBean.getPulseArrayList().clear();
 
-        UserJsonBean userJsonBean = new UserJsonBean(ConstantPool.DEVICEID);
+        UserJsonBean userJsonBean = new UserJsonBean(GATTService.DEVICE_ID);
         userJsonBean.setPulseArrayList(list);
         String userJson = new Gson().toJson(userJsonBean);
 
@@ -281,6 +303,10 @@ public class WriteToCSV {
             int pulse;
             int trustLevel;
             time = DateUtils.getDateToString(list.get(i).getTime() * 1000);
+            if (time.length() != "2017-04-26 11:17:17".length()){
+                Log.e("MSL", "writeAngV: " + time );
+                continue;
+            }
             pulse = list.get(i).getPulse();
             trustLevel = list.get(i).getTrustLevel();
             buffer.append(time).append(",").append(pulse).append(",").append(trustLevel).append("\n");
@@ -289,7 +315,7 @@ public class WriteToCSV {
     }
 
     //追加文件：使用FileOutputStream，在构造FileOutputStream时，把第二个参数设为true
-    public static void addToFileByOutputStream(String file, String conent) {
+    public void addToFileByOutputStream(String file, String conent) {
         BufferedWriter out = null;
         try {
             out = new BufferedWriter(new OutputStreamWriter(
@@ -307,7 +333,7 @@ public class WriteToCSV {
     }
 
     // 以追加形式写文件:写文件器，构造函数中的第二个参数为true
-    public static void addToFileByFileWriter(String fileName, String content) {
+    private  void addToFileByFileWriter(String fileName, String content) {
         try {
             FileWriter writer = new FileWriter(fileName, true);
             writer.write(content);
@@ -316,4 +342,5 @@ public class WriteToCSV {
             e.printStackTrace();
         }
     }
+
 }
