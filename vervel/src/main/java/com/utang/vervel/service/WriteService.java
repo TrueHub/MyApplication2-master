@@ -1,9 +1,7 @@
 package com.utang.vervel.service;
 
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
-import android.net.wifi.WifiManager;
 import android.os.IBinder;
 import android.text.TextUtils;
 import android.util.Log;
@@ -68,9 +66,9 @@ public class WriteService extends Service {
             String wifiMac = intent.getStringExtra("wifiMac");
             Log.i("MSL", "onStartCommand: " + wifiName + "," + wifiMac);
             if (!wifiName.equals(ConstantPool.debugWifiName) || !wifiMac.equals(ConstantPool.debugWifiMac))
-                url = ConstantPool.URL_DEBUG_LAN;
-            else
                 url = ConstantPool.URL_DEBUG_WLAN;
+            else
+                url = ConstantPool.URL_DEBUG_LAN;
         }
         writeToCSV = new WriteToCSV(url);
         return super.onStartCommand(intent, flags, startId);
