@@ -62,11 +62,7 @@ public class WriteToCSV {
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                /*try {
-                    Log.i("MSL", "onResponse: OK" + response.body().string());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }*/
+                Log.d("MSL", "onResponse: OK");
                 EventUtil.post("上传成功");
 
             }

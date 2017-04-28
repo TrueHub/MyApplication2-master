@@ -21,7 +21,7 @@ public class WriteService extends Service {
     public WriteService() {
     }
 
-    private WriteToCSV writeToCSV ;
+    private WriteToCSV writeToCSV;
     private UserBean userBean;
     private final int DATA_SIZE = 1;
 
@@ -57,18 +57,18 @@ public class WriteService extends Service {
         Log.d("MSL", "onStartCommand: 当前net：" + net);
         if (net.equals("mobile")) {
             url = ConstantPool.URL_DEBUG_WLAN;
-        }else if (net.equals("wifi")){
-            if (TextUtils.isEmpty(intent.getStringExtra("wifiName")) || TextUtils.isEmpty(intent.getStringExtra("wifiMac"))){
+        } else if (net.equals("wifi")) {
+            if (TextUtils.isEmpty(intent.getStringExtra("wifiName")) || TextUtils.isEmpty(intent.getStringExtra("wifiMac"))) {
                 url = ConstantPool.URL_DEBUG_WLAN;
             }
-            Log.d("MSL", "onStartCommand: " + intent.getStringExtra("wifiName") + "," + intent.getStringExtra("wifiMac"));
-            String wifiName = intent.getStringExtra("wifiName");
+            Log.d("MSL", "onStartCommand: "  + intent.getStringExtra("wifiMac"));
             String wifiMac = intent.getStringExtra("wifiMac");
-            Log.i("MSL", "onStartCommand: " + wifiName + "," + wifiMac);
-            if (!wifiName.equals(ConstantPool.debugWifiName) || !wifiMac.equals(ConstantPool.debugWifiMac))
-                url = ConstantPool.URL_DEBUG_WLAN;
-            else
+            Log.d("MSL", "onStartCommand: " + wifiMac.equals(ConstantPool.debugWifiMac));
+            if (wifiMac.equals(ConstantPool.debugWifiMac))
                 url = ConstantPool.URL_DEBUG_LAN;
+            else if (!wifiMac.equals(ConstantPool.debugWifiMac)) {
+                url = ConstantPool.URL_DEBUG_WLAN;
+            }
         }
         writeToCSV = new WriteToCSV(url);
         return super.onStartCommand(intent, flags, startId);

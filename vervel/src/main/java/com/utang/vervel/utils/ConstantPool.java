@@ -44,10 +44,10 @@ public class ConstantPool {
     public static final String DEVICEID_1 = "Nordic-FC0942090";
     public static final String DEVICEID_2 = "Nordic-9FBEE5315";
 
-    public static String debugWifiName = "linux.utang.cn-puppet";
-    public static String debugWifiMac = "04:bd:70:da:1b:d0";
+    public static final String debugWifiName = "linux.utang.cn-puppet";
+    public static final String debugWifiMac = "04:bd:70:da:1b:d0";
 
-    public static String URL_DEBUG_LAN = "http://192.168.0.141:8080/";
-    public static String URL_DEBUG_WLAN = "http://116.236.215.26:8000/";
+    public static final String URL_DEBUG_LAN = "http://192.168.0.141:8080/";
+    public static final String URL_DEBUG_WLAN = "http://116.236.215.26:8000/";
 
 }

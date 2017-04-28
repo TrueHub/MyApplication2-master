@@ -240,7 +240,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         writeServiceIntent = new Intent(this, WriteService.class);
                         if (isWifiState) {
                             writeServiceIntent.putExtra("net", "wifi");
-                            writeServiceIntent.putExtra("wifiName", WIFIUtils.getWifiId((WifiManager) getSystemService(Context.WIFI_SERVICE)));
                             writeServiceIntent.putExtra("wifiMac", WIFIUtils.getWifiMAC((WifiManager) getSystemService(Context.WIFI_SERVICE)));
                         } else {
                             writeServiceIntent.putExtra("net", "mobile");
