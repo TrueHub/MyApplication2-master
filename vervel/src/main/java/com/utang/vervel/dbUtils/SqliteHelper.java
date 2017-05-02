@@ -72,7 +72,7 @@ public class SqliteHelper extends SQLiteOpenHelper {
         }
     }
 
-    public void addAOGBySw(ArrayList<GravA> list) {
+    private void addAOGBySw(ArrayList<GravA> list) {
         db.beginTransaction();
         try {
             String time;
@@ -98,7 +98,7 @@ public class SqliteHelper extends SQLiteOpenHelper {
         db.endTransaction();
     }
 
-    public void addMagnetismBySw(ArrayList<Mag> list) {
+    private void addMagnetismBySw(ArrayList<Mag> list) {
         db.beginTransaction();
         try {
             String time;
@@ -123,7 +123,7 @@ public class SqliteHelper extends SQLiteOpenHelper {
         db.endTransaction();
     }
 
-    public void addPalstanceBySw(ArrayList<AngV> list) {
+    private void addPalstanceBySw(ArrayList<AngV> list) {
         db.beginTransaction();
         try {
             String time;
@@ -149,7 +149,7 @@ public class SqliteHelper extends SQLiteOpenHelper {
         db.endTransaction();
     }
 
-    public void addPressureBySw(ArrayList<Pressure> list) {
+    private void addPressureBySw(ArrayList<Pressure> list) {
         db.beginTransaction();  //开启事务
         try {
             String time;
@@ -171,7 +171,7 @@ public class SqliteHelper extends SQLiteOpenHelper {
         db.endTransaction();
     }
 
-    public void addPulseBySw(ArrayList<Pulse> list) {
+    private void addPulseBySw(ArrayList<Pulse> list) {
         Log.i("MSL", "addPulseBySw: " + list.size());
         db.beginTransaction();  //开启事务
         try {

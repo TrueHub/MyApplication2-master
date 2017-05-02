@@ -17,5 +17,4 @@ public interface RetrofitItfc {
     //http://192.168.0.232:8080/weigan/upload/uploadData
     @POST("weigan/upload/uploadData")
     Call<ResponseBody> postUser (@Body RequestBody body);
-
 }

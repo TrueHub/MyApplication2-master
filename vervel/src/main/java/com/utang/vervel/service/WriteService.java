@@ -54,7 +54,7 @@ public class WriteService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         String net = intent.getStringExtra("net");
-        Log.d("MSL", "onStartCommand: 当前net：" + net);
+        Log.d("MSL", "onStartCommand: 当前网络：" + net);
         if (net.equals("mobile")) {
             url = ConstantPool.URL_DEBUG_WLAN;
         } else if (net.equals("wifi")) {
@@ -78,18 +78,28 @@ public class WriteService extends Service {
 
 
         if (userBean.getGravAArrayList().size() >= DATA_SIZE) {
+            Log.i("MSL", "writeByCsv: " + userBean.getGravAArrayList().size() +"," + userBean.getMagArrayList().size() + "," +
+                    userBean.getAngVArrayList().size() +"," + userBean.getPressureArrayList().size() +"," +userBean.getPulseArrayList().size());
             writeToCSV.writeGravA(userBean.getGravAArrayList(), "GravA.csv");
         }
         if (userBean.getMagArrayList().size() >= DATA_SIZE) {
+            Log.i("MSL", "writeByCsv: " + userBean.getGravAArrayList().size() +"," + userBean.getMagArrayList().size() + "," +
+                    userBean.getAngVArrayList().size() +"," + userBean.getPressureArrayList().size() +"," +userBean.getPulseArrayList().size());
             writeToCSV.writeMag(userBean.getMagArrayList(), "Mag.csv");
         }
         if (userBean.getAngVArrayList().size() >= DATA_SIZE) {
+            Log.i("MSL", "writeByCsv: " + userBean.getGravAArrayList().size() +"," + userBean.getMagArrayList().size() + "," +
+                    userBean.getAngVArrayList().size() +"," + userBean.getPressureArrayList().size() +"," +userBean.getPulseArrayList().size());
             writeToCSV.writeAngV(userBean.getAngVArrayList(), "AngV.csv");
         }
         if (userBean.getPressureArrayList().size() >= DATA_SIZE) {
+            Log.i("MSL", "writeByCsv: " + userBean.getGravAArrayList().size() +"," + userBean.getMagArrayList().size() + "," +
+                    userBean.getAngVArrayList().size() +"," + userBean.getPressureArrayList().size() +"," +userBean.getPulseArrayList().size());
             writeToCSV.writePressure(userBean.getPressureArrayList(), "Pressure.csv");
         }
         if (userBean.getPulseArrayList().size() >= DATA_SIZE) {
+            Log.i("MSL", "writeByCsv: " + userBean.getGravAArrayList().size() +"," + userBean.getMagArrayList().size() + "," +
+                    userBean.getAngVArrayList().size() +"," + userBean.getPressureArrayList().size() +"," +userBean.getPulseArrayList().size());
             writeToCSV.writePulse(userBean.getPulseArrayList(), "Pulse.csv");
         }
     }
