@@ -3,10 +3,12 @@ package com.utang.vervel.beans;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.io.Serializable;
+
 /**
  * Created by user on 2017/4/7.
  */
-public class AngV implements Parcelable {
+public class AngV implements Parcelable ,Serializable{
     private long time;
     private int velX;
     private int velY;

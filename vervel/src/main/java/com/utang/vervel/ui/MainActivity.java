@@ -50,6 +50,8 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 
+import static android.R.attr.start;
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private Button btn_connect;
@@ -114,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     ArrayList<AngV> angVArrayList = new ArrayList<>();
     private UserBean userBean;
     private Intent writeServiceIntent;
-    private int LIST_SIZE = 100;
+    private int LIST_SIZE = 1000;
     private boolean getDataEnd;//接收完数据，将小于100的list也存储和上传
     private static boolean isWifiState;
 
@@ -127,6 +129,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         requestMyPermissions();
 
         EventUtil.register(this);
+        writeServiceIntent = new Intent(this, WriteService.class);
 
         if (userBean == null) {
             userBean = UserBean.getInstence();
@@ -237,17 +240,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     } else {
                         gattService = new Intent(this, GATTService.class);
                         startService(gattService);
-                        writeServiceIntent = new Intent(this, WriteService.class);
-                        if (isWifiState) {
-                            writeServiceIntent.putExtra("net", "wifi");
-                            writeServiceIntent.putExtra("wifiMac", WIFIUtils.getWifiMAC((WifiManager) getSystemService(Context.WIFI_SERVICE)));
-                        } else {
-                            writeServiceIntent.putExtra("net", "mobile");
-                        }
-                        startService(writeServiceIntent);
                         Log.e("MSL", "onClick: gatt is not running");
                         btn_delete_flash.setClickable(true);
                     }
+
+                    startWriteService();
+
                 } else if (btn_connect.getText().equals("断开")) {
                     EventUtil.post("STOP GATT_SERVICE");
                     btn_search_pulse_his.setClickable(false);
@@ -264,17 +262,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.btn_search_his:
                 Log.d("MSL", "onClick: 网络是否wifi状态：" + isWifiState);
-                if (isWifiState) {
-                    writeServiceIntent.putExtra("net", "wifi");
-                    writeServiceIntent.putExtra("wifiName", WIFIUtils.getWifiId((WifiManager) getSystemService(Context.WIFI_SERVICE)));
-                    writeServiceIntent.putExtra("wifiMac", WIFIUtils.getWifiMAC((WifiManager) getSystemService(Context.WIFI_SERVICE)));
-                } else {
-                    writeServiceIntent.putExtra("net", "mobile");
-                }
-                startService(writeServiceIntent);
+
+                startWriteService();
+
                 getDataEnd = false;
-
-
 
                 EventUtil.post("SEARCH_HIS");
 
@@ -310,6 +301,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 });
                 break;
         }
+    }
+
+    private void startWriteService() {
+        if (isWifiState) {
+            writeServiceIntent.putExtra("net", "wifi");
+            writeServiceIntent.putExtra("wifiName", WIFIUtils.getWifiId((WifiManager) getSystemService(Context.WIFI_SERVICE)));
+            writeServiceIntent.putExtra("wifiMac", WIFIUtils.getWifiMAC((WifiManager) getSystemService(Context.WIFI_SERVICE)));
+        } else {
+            writeServiceIntent.putExtra("net", "mobile or null");
+        }
+        startService(writeServiceIntent);
     }
 
     @Override
@@ -366,6 +368,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 } else {
                     initAll();
                 }
+                break;
+            case "NET STATE":
+                startWriteService();
                 break;
         }
 
@@ -457,7 +462,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             ArrayList<Pulse> list = new ArrayList<>();
             list.addAll(pulseArrayList);
-            userBean.setPulseArrayList(list);
+            userBean.getPulseArrayList().addAll(list);
             pulseArrayList.clear();
 //            Log.i("MSL", "getBluetoothHelathCallback: " + userBean.getPulseArrayList().size() + "," + pulseArrayList.size() + "," +list.size());
         }
@@ -494,7 +499,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (gravAArrayList.size() == LIST_SIZE || getDataEnd) {
             ArrayList<GravA> list = new ArrayList<>();
             list.addAll(gravAArrayList);
-            userBean.setGravAArrayList(list);
+            userBean.getGravAArrayList().addAll(list);
             gravAArrayList.clear();
 //            Log.i("MSL", "getBluetoothHelathCallback: " + userBean.getGravAArrayList().size() + "," + gravAArrayList.size() + "," +list.size());
         }
@@ -515,7 +520,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (angVArrayList.size() == LIST_SIZE || getDataEnd) {
             ArrayList<AngV> list = new ArrayList<>();
             list.addAll(angVArrayList);
-            userBean.setAngVArrayList(list);
+            userBean.getAngVArrayList().addAll(list);
             angVArrayList.clear();
 //            Log.i("MSL", "getBluetoothHelathCallback: " + userBean.getAngVArrayList().size() + "," + angVArrayList.size() + "," +list.size());
         }
@@ -536,9 +541,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (magArrayList.size() == LIST_SIZE || getDataEnd) {
             ArrayList<Mag> list = new ArrayList<>();
             list.addAll(magArrayList);
-            userBean.setMagArrayList(list);
+            userBean.getMagArrayList().addAll(list);
             magArrayList.clear();
-//            Log.i("MSL", "getBluetoothHelathCallback: " + userBean.getPulseArrayList().size() + "," + magArrayList.size() + "," +list.size());
+//            Log.i("MSL", "getBluetoothCallback: " + userBean.getPulseArrayList().size() + "," + magArrayList.size() + "," +list.size());
         }
         tv_magnetism_X.setText(String.valueOf(mag.getStrengthX()));
         tv_magnetism_Y.setText(String.valueOf(mag.getStrengthY()));
@@ -557,7 +562,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (pressureArrayList.size() == LIST_SIZE || getDataEnd) {
             ArrayList<Pressure> list = new ArrayList<>();
             list.addAll(pressureArrayList);
-            userBean.setPressureArrayList(list);
+            userBean.getPressureArrayList().addAll(list);
             pressureArrayList.clear();
 //            Log.i("MSL", "getBluetoothHelathCallback: " + userBean.getPulseArrayList().size() + "," + pressureArrayList.size() + "," +list.size());
         }
@@ -565,8 +570,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         tv_pressure.setText(String.valueOf(pressure.getIntensityOfPressure()));
         tv_getdata_his_time.setText(DateUtils.getDateToString(pressure.getTime() * 1000));
     }
-
-
     private static void showMessageOKCancel(Activity activity, String message, DialogInterface.OnClickListener okListener) {
         new AlertDialog.Builder(activity)
                 .setMessage(message)
@@ -586,7 +589,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            // TODO: This method is called when the BroadcastReceiver is receiving
             // an Intent broadcast.
             switch (intent.getAction()) {
                 case WifiManager.WIFI_STATE_CHANGED_ACTION:
@@ -611,8 +613,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                     if (state == NetworkInfo.State.CONNECTED) {
                         Log.i("MSL", "onReceive: √√ wifi可用");
+                        isWifiState = true;
                     } else {
                         Log.i("MSL", "onReceive: !! wifi不可用");
+                        isWifiState = false;
+                        EventUtil.post(new EventNotification("NET STATE",false));
                     }
                     break;
                 case ConnectivityManager.CONNECTIVITY_ACTION:
@@ -624,12 +629,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         case ConnectivityManager.TYPE_WIFI:
                             Log.i("MSL", "onReceive: 连接上wifi");
                             isWifiState = true;
+                            EventUtil.post(new EventNotification("NET STATE",true));
                             break;
                         case ConnectivityManager.TYPE_MOBILE:
                             Log.i("MSL", "onReceive: 当前使用移动数据");
+                            EventUtil.post(new EventNotification("NET STATE",true));
                             isWifiState = false;
                             break;
                         default:
+                            isWifiState = false;
                             break;
                     }
                     break;

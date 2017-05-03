@@ -2,12 +2,13 @@ package com.utang.vervel.beans;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import java.io.Serializable;
 
 /**
  * Created by user on 2017/4/7.
  * 历史心率的bean对象
  */
-public class Pulse implements Parcelable {
+public class Pulse implements Parcelable,Serializable {
     public Pulse() {
     }
 

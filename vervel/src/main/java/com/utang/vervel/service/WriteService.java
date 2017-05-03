@@ -2,15 +2,37 @@ package com.utang.vervel.service;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Environment;
 import android.os.IBinder;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.google.gson.Gson;
 import com.utang.vervel.beans.UserBean;
+import com.utang.vervel.beans.UserJsonBean;
 import com.utang.vervel.dbUtils.DataBaseContext;
 import com.utang.vervel.dbUtils.SqliteHelper;
+import com.utang.vervel.net.RetrofitItfc;
 import com.utang.vervel.utils.ConstantPool;
+import com.utang.vervel.utils.EventUtil;
+import com.utang.vervel.utils.LogUtil;
 import com.utang.vervel.utils.WriteToCSV;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.util.concurrent.TimeUnit;
+
+import okhttp3.OkHttpClient;
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * 将数据写入本地 (sqlite3 & csv) 的service
@@ -55,51 +77,131 @@ public class WriteService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         String net = intent.getStringExtra("net");
         Log.d("MSL", "onStartCommand: 当前网络：" + net);
-        if (net.equals("mobile")) {
+        if (net.equals("mobile or null")) {
             url = ConstantPool.URL_DEBUG_WLAN;
         } else if (net.equals("wifi")) {
             if (TextUtils.isEmpty(intent.getStringExtra("wifiName")) || TextUtils.isEmpty(intent.getStringExtra("wifiMac"))) {
                 url = ConstantPool.URL_DEBUG_WLAN;
             }
-            Log.d("MSL", "onStartCommand: "  + intent.getStringExtra("wifiMac"));
+            Log.d("MSL", "onStartCommand: " + intent.getStringExtra("wifiMac") + " ," + intent.getStringExtra("wifiName"));
             String wifiMac = intent.getStringExtra("wifiMac");
+            String wifiName = intent.getStringExtra("wifiName");
             Log.d("MSL", "onStartCommand: " + wifiMac.equals(ConstantPool.debugWifiMac));
-            if (wifiMac.equals(ConstantPool.debugWifiMac))
+            if (wifiMac.equals(ConstantPool.debugWifiMac) || wifiMac.equals(ConstantPool.debugWifiMac2)
+                    || wifiName.equals(ConstantPool.debugWifiName))
                 url = ConstantPool.URL_DEBUG_LAN;
-            else if (!wifiMac.equals(ConstantPool.debugWifiMac)) {
+            else {
                 url = ConstantPool.URL_DEBUG_WLAN;
             }
+
+            //有网络状况下，重新上传缓存的数据
+            upLoadCache(url);
         }
-        writeToCSV = new WriteToCSV(url);
+        writeToCSV = new WriteToCSV(this, url);
         return super.onStartCommand(intent, flags, startId);
+    }
+
+    private void upLoadCache(String url) {
+        //遍历预置的文件夹，如果有文件，就读出来
+
+        String fileDir = Environment.getExternalStorageDirectory().getAbsolutePath();//SD卡根目录
+        fileDir += "/vervel";
+        File dir = new File(fileDir);
+
+        final File[] files = dir.listFiles();
+
+        if (files == null) return;
+        for (int i = 0; i < files.length; i++) {
+            if (files[i].isDirectory()) continue;//如果是文件夹，忽略它
+            String fileName = files[i].getName();
+            final File file = files[i];
+            Log.i("MSL", "upLoadCache: " + fileName);
+
+            ObjectInputStream ois = null;
+            try {
+                FileInputStream fis = new FileInputStream(file);
+                ois = new ObjectInputStream(fis);
+
+                UserJsonBean tmpUser = (UserJsonBean) ois.readObject();
+                String userJson = new Gson().toJson(tmpUser);
+                LogUtil.LogMSL("MSL",userJson);
+
+                OkHttpClient client = new OkHttpClient.Builder()
+                        .connectTimeout(1000 * 20, TimeUnit.SECONDS)
+                        .writeTimeout(1000 * 20, TimeUnit.SECONDS)
+                        .readTimeout(1000 * 20, TimeUnit.SECONDS).build();
+                Retrofit retrofit = new Retrofit.Builder()
+                        .baseUrl(url)
+                        .addConverterFactory(GsonConverterFactory.create()).client(client)
+                        .build();
+
+                RetrofitItfc retrofitItfc = retrofit.create(RetrofitItfc.class);
+
+                RequestBody requestBody = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), userJson);
+
+                Call<ResponseBody> call = retrofitItfc.postUser(requestBody);
+
+                call.enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        Log.d("MSL", "onResponse: OK");
+                        EventUtil.post("上传成功");
+                        Log.i("MSL", "onResponse: delete file");
+                        boolean deleteResult = file.delete();
+                        Log.d("MSL", "onResponse: " + deleteResult);
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        Log.e("MSL", "onResponse: Fail" + t);
+                        EventUtil.post("上传失败");
+                    }
+                });
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            } finally {
+                if (ois != null) try {
+                    ois.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
+
     }
 
     public void writeByCsv() {
 
 
         if (userBean.getGravAArrayList().size() >= DATA_SIZE) {
-            Log.i("MSL", "writeByCsv: " + userBean.getGravAArrayList().size() +"," + userBean.getMagArrayList().size() + "," +
-                    userBean.getAngVArrayList().size() +"," + userBean.getPressureArrayList().size() +"," +userBean.getPulseArrayList().size());
+            Log.i("MSL", "writeByCsv: " + userBean.getGravAArrayList().size() + "," + userBean.getMagArrayList().size() + "," +
+                    userBean.getAngVArrayList().size() + "," + userBean.getPressureArrayList().size() + "," + userBean.getPulseArrayList().size());
             writeToCSV.writeGravA(userBean.getGravAArrayList(), "GravA.csv");
         }
         if (userBean.getMagArrayList().size() >= DATA_SIZE) {
-            Log.i("MSL", "writeByCsv: " + userBean.getGravAArrayList().size() +"," + userBean.getMagArrayList().size() + "," +
-                    userBean.getAngVArrayList().size() +"," + userBean.getPressureArrayList().size() +"," +userBean.getPulseArrayList().size());
+            Log.i("MSL", "writeByCsv: " + userBean.getGravAArrayList().size() + "," + userBean.getMagArrayList().size() + "," +
+                    userBean.getAngVArrayList().size() + "," + userBean.getPressureArrayList().size() + "," + userBean.getPulseArrayList().size());
             writeToCSV.writeMag(userBean.getMagArrayList(), "Mag.csv");
         }
         if (userBean.getAngVArrayList().size() >= DATA_SIZE) {
-            Log.i("MSL", "writeByCsv: " + userBean.getGravAArrayList().size() +"," + userBean.getMagArrayList().size() + "," +
-                    userBean.getAngVArrayList().size() +"," + userBean.getPressureArrayList().size() +"," +userBean.getPulseArrayList().size());
+            Log.i("MSL", "writeByCsv: " + userBean.getGravAArrayList().size() + "," + userBean.getMagArrayList().size() + "," +
+                    userBean.getAngVArrayList().size() + "," + userBean.getPressureArrayList().size() + "," + userBean.getPulseArrayList().size());
             writeToCSV.writeAngV(userBean.getAngVArrayList(), "AngV.csv");
         }
         if (userBean.getPressureArrayList().size() >= DATA_SIZE) {
-            Log.i("MSL", "writeByCsv: " + userBean.getGravAArrayList().size() +"," + userBean.getMagArrayList().size() + "," +
-                    userBean.getAngVArrayList().size() +"," + userBean.getPressureArrayList().size() +"," +userBean.getPulseArrayList().size());
+            Log.i("MSL", "writeByCsv: " + userBean.getGravAArrayList().size() + "," + userBean.getMagArrayList().size() + "," +
+                    userBean.getAngVArrayList().size() + "," + userBean.getPressureArrayList().size() + "," + userBean.getPulseArrayList().size());
             writeToCSV.writePressure(userBean.getPressureArrayList(), "Pressure.csv");
         }
         if (userBean.getPulseArrayList().size() >= DATA_SIZE) {
-            Log.i("MSL", "writeByCsv: " + userBean.getGravAArrayList().size() +"," + userBean.getMagArrayList().size() + "," +
-                    userBean.getAngVArrayList().size() +"," + userBean.getPressureArrayList().size() +"," +userBean.getPulseArrayList().size());
+            Log.i("MSL", "writeByCsv: " + userBean.getGravAArrayList().size() + "," + userBean.getMagArrayList().size() + "," +
+                    userBean.getAngVArrayList().size() + "," + userBean.getPressureArrayList().size() + "," + userBean.getPulseArrayList().size());
             writeToCSV.writePulse(userBean.getPulseArrayList(), "Pulse.csv");
         }
     }
@@ -116,4 +218,5 @@ public class WriteService extends Service {
             sqliteHelper.insertDataBySw();
         }
     }
+
 }

@@ -3,10 +3,12 @@ package com.utang.vervel.beans;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.io.Serializable;
+
 /**
  * Created by user on 2017/4/7.
  */
-public class GravA implements Parcelable {
+public class GravA implements Parcelable ,Serializable {
     public GravA() {
     }
 

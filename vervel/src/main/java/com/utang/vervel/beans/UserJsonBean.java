@@ -3,6 +3,7 @@ package com.utang.vervel.beans;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
@@ -10,7 +11,7 @@ import java.util.ArrayList;
  * 单例user类
  */
 
-public class UserJsonBean implements Parcelable {
+public class UserJsonBean implements Parcelable , Serializable{
     private ArrayList<GravA> gravAArrayList = new ArrayList<>();
     private ArrayList<Mag> magArrayList = new ArrayList<>();
     private ArrayList<AngV> angVArrayList = new ArrayList<>();
