@@ -24,7 +24,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ui.MainActivity">
+        <activity
+            android:name=".ui.MainActivity"
+            android:configChanges="orientation|keyboardHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -33,9 +35,12 @@
         </activity>
         <activity
             android:name=".ui.LoginActivity"
+            android:configChanges="orientation|keyboardHidden"
             android:label="@string/title_activity_login"
             android:theme="@style/Animation.AppCompat.Dialog"/>
-        <activity android:name=".ui.SearchResultActivity">
+        <activity
+            android:name=".ui.SearchResultActivity"
+            android:configChanges="orientation|keyboardHidden">
         </activity>
 
         <service android:name=".service.GATTService"/>
@@ -45,14 +50,16 @@
             android:exported="true">
         </service>
 
-        <receiver
-            android:name=".ui.MainActivity$NetWorkStateChangedReceiver">
+        <receiver android:name=".ui.MainActivity$NetWorkStateChangedReceiver">
             <intent-filter>
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
-                <action android:name="android.net.wifi.WIFI_STATE_CHANGED" />
-                <action android:name="android.net.wifi.STATE_CHANGE" />
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
+                <action android:name="android.net.wifi.WIFI_STATE_CHANGED"/>
+                <action android:name="android.net.wifi.STATE_CHANGE"/>
             </intent-filter>
         </receiver>
+
+        <activity android:name=".ui.LineChartPage">
+        </activity>
     </application>
 
 </manifest>

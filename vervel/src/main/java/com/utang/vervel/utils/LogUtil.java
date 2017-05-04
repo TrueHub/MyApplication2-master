@@ -19,7 +19,7 @@ public class LogUtil {
             int strLength = msg.length();
             int start = 0;
             int end = LOG_MAXLENGTH;
-            for (int i = 0; i < 100; i++) {
+            for (int i = 0; i < msg.length()/LOG_MAXLENGTH + 1; i++) {
                 if (strLength > end) {
                     Log.d("MSL___" + i, msg.substring(start, end));
                     start = end;
@@ -39,7 +39,7 @@ public class LogUtil {
             int strLength = msg.length();
             int start = 0;
             int end = LOG_MAXLENGTH;
-            for (int i = 0; i < 100; i++) {
+            for (int i = 0; i < msg.length()/LOG_MAXLENGTH + 1; i++) {
                 if (strLength > end) {
                     Log.d(type + "___" + i, msg.substring(start, end));
                     start = end;

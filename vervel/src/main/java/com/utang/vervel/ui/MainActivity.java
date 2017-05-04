@@ -6,7 +6,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
@@ -35,7 +34,6 @@ import com.utang.vervel.beans.Pulse;
 import com.utang.vervel.beans.PulseBean;
 import com.utang.vervel.beans.UserBean;
 import com.utang.vervel.eventbean.EventNotification;
-import com.utang.vervel.eventbean.NetWorkEventBean;
 import com.utang.vervel.moudul.ControlDeviceImp;
 import com.utang.vervel.service.GATTService;
 import com.utang.vervel.service.WriteService;
@@ -50,13 +48,11 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 
-import static android.R.attr.start;
-
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private Button btn_connect;
     private Button btn_search_device;
-    private Button btn_search_time;
+    private Button btn_search_his;
     private Button btn_search_pulse_his;
     private Button btn_search_AOG;
     private Button btn_search_palstance;
@@ -170,7 +166,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btn_connect = (Button) findViewById(R.id.btn_connect);
         btn_search_device = (Button) findViewById(R.id.btn_search_device);
         tv_device_status = (TextView) findViewById(R.id.tv_device_status);
-        btn_search_time = (Button) findViewById(R.id.btn_search_his);
+        btn_search_his = (Button) findViewById(R.id.btn_search_his);
         tv_phone_time = (TextView) findViewById(R.id.tv_phone_time);
         tv_device_time = (TextView) findViewById(R.id.tv_device_time);
         tv_pulse = (TextView) findViewById(R.id.tv_pulse);
@@ -188,7 +184,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         tv_pressure = (TextView) findViewById(R.id.tv_pressure);
         btn_connect.setOnClickListener(this);
         btn_search_device.setOnClickListener(this);
-        btn_search_time.setOnClickListener(this);
+        btn_search_his.setOnClickListener(this);
         btn_search_pulse_his.setOnClickListener(this);
         btn_search_AOG.setOnClickListener(this);
         btn_search_palstance.setOnClickListener(this);
@@ -275,6 +271,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 btn_search_magnetism.setClickable(true);
                 btn_search_pressure.setClickable(true);
 
+                btn_search_his.setClickable(false);
+
                 break;
             case R.id.btn_search_pulse_his:
                 controlDeviceImp.searchPulseHis(pulseList);
@@ -358,6 +356,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (eventNotification.getType()) {
             case "HIS_DATA":
                 getDataEnd = eventNotification.isGetOver();
+                btn_search_his.setClickable(true);
                 break;
             case GATTService.DEVICE_ID:
                 if (eventNotification.isGetOver()) {
@@ -454,7 +453,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         pulseArrayList.add(pulse);
         //添加到另一个list，用于传到searchResultActivity中本地显示最近的数据
         pulseList.add(pulse);
-        if (pulseList.size() > 100) {
+        if (pulseList.size() > 600) {
             pulseList.remove(0);
         }
 
@@ -493,7 +492,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //心率历史
         gravAArrayList.add(gravA);
         gravAList.add(gravA);
-        if (gravAList.size() > 100) {
+        if (gravAList.size() >600) {
             gravAList.remove(0);
         }
         if (gravAArrayList.size() == LIST_SIZE || getDataEnd) {
@@ -514,7 +513,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //心率历史
         angVArrayList.add(angV);
         angVList.add(angV);
-        if (angVList.size() > 100) {
+        if (angVList.size() > 600) {
             angVList.remove(0);
         }
         if (angVArrayList.size() == LIST_SIZE || getDataEnd) {
@@ -535,7 +534,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //心率历史
         magArrayList.add(mag);
         magList.add(mag);
-        if (magList.size() > 100) {
+        if (magList.size() > 600) {
             magList.remove(0);
         }
         if (magArrayList.size() == LIST_SIZE || getDataEnd) {
@@ -556,7 +555,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //心率历史
         pressureArrayList.add(pressure);
         pressureList.add(pressure);
-        if (pressureList.size() > 100) {
+        if (pressureList.size() > 600) {
             pressureList.remove(0);
         }
         if (pressureArrayList.size() == LIST_SIZE || getDataEnd) {
@@ -570,6 +569,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         tv_pressure.setText(String.valueOf(pressure.getIntensityOfPressure()));
         tv_getdata_his_time.setText(DateUtils.getDateToString(pressure.getTime() * 1000));
     }
+
     private static void showMessageOKCancel(Activity activity, String message, DialogInterface.OnClickListener okListener) {
         new AlertDialog.Builder(activity)
                 .setMessage(message)

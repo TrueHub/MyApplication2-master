@@ -5,8 +5,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.vervel.utang.user.vervel.ui.SearchResultActivity">
+    tools:context="com.utang.vervel.ui.SearchResultActivity">
 
+    <Button
+        android:id="@+id/btn_linechart"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="查看波形图"
+        />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -50,6 +56,8 @@
     <ListView
         android:id="@+id/list_result"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"></ListView>
+        android:layout_height="match_parent">
+
+    </ListView>
 
 </LinearLayout>

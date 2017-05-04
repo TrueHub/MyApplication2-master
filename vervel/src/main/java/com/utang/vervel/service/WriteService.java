@@ -1,9 +1,13 @@
 package com.utang.vervel.service;
 
+import android.app.Activity;
 import android.app.Service;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Environment;
 import android.os.IBinder;
+import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -39,6 +43,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 public class WriteService extends Service {
     private String url;
+    private Context context;
+    private boolean isUploading = false;
 
     public WriteService() {
     }
@@ -56,7 +62,6 @@ public class WriteService extends Service {
     public void onCreate() {
         super.onCreate();
         userBean = UserBean.getInstence();
-//        url = ConstantPool.URL_DEBUG_LAN;
         Log.i("MSL", "onCreate: write service");
         new Thread() {
             @Override
@@ -95,13 +100,16 @@ public class WriteService extends Service {
             }
 
             //有网络状况下，重新上传缓存的数据
-            upLoadCache(url);
+            if (!isUploading) {
+                isUploading = true;
+                upLoadCache(url);
+            }
         }
         writeToCSV = new WriteToCSV(this, url);
         return super.onStartCommand(intent, flags, startId);
     }
 
-    private void upLoadCache(String url) {
+    private void upLoadCache(final String url) {
         //遍历预置的文件夹，如果有文件，就读出来
 
         String fileDir = Environment.getExternalStorageDirectory().getAbsolutePath();//SD卡根目录
@@ -111,6 +119,8 @@ public class WriteService extends Service {
         final File[] files = dir.listFiles();
 
         if (files == null) return;
+
+
         for (int i = 0; i < files.length; i++) {
             if (files[i].isDirectory()) continue;//如果是文件夹，忽略它
             String fileName = files[i].getName();
@@ -124,12 +134,12 @@ public class WriteService extends Service {
 
                 UserJsonBean tmpUser = (UserJsonBean) ois.readObject();
                 String userJson = new Gson().toJson(tmpUser);
-                LogUtil.LogMSL("MSL",userJson);
+//                LogUtil.LogMSL("MSL", userJson);
 
                 OkHttpClient client = new OkHttpClient.Builder()
-                        .connectTimeout(1000 * 20, TimeUnit.SECONDS)
-                        .writeTimeout(1000 * 20, TimeUnit.SECONDS)
-                        .readTimeout(1000 * 20, TimeUnit.SECONDS).build();
+                        .connectTimeout(600, TimeUnit.SECONDS)
+                        .writeTimeout(600, TimeUnit.SECONDS)
+                        .readTimeout(600, TimeUnit.SECONDS).build();
                 Retrofit retrofit = new Retrofit.Builder()
                         .baseUrl(url)
                         .addConverterFactory(GsonConverterFactory.create()).client(client)
@@ -145,7 +155,8 @@ public class WriteService extends Service {
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                         Log.d("MSL", "onResponse: OK");
-                        EventUtil.post("上传成功");
+                        EventUtil.post("缓存上传成功");
+                        isUploading = false;
                         Log.i("MSL", "onResponse: delete file");
                         boolean deleteResult = file.delete();
                         Log.d("MSL", "onResponse: " + deleteResult);
@@ -155,6 +166,7 @@ public class WriteService extends Service {
                     public void onFailure(Call<ResponseBody> call, Throwable t) {
                         Log.e("MSL", "onResponse: Fail" + t);
                         EventUtil.post("上传失败");
+                        isUploading = false;
                     }
                 });
 
@@ -173,6 +185,7 @@ public class WriteService extends Service {
             }
 
         }
+
 
     }
 

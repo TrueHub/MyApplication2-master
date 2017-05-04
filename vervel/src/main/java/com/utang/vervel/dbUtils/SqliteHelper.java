@@ -51,7 +51,7 @@ public class SqliteHelper extends SQLiteOpenHelper {
 
     public void insertDataBySw() {
         if (userBean.getGravAArrayList().size() != 0) {
-            addAOGBySw(userBean.getGravAArrayList());
+            addGravABySw(userBean.getGravAArrayList());
             userBean.getGravAArrayList().clear();
         }
         if (userBean.getPulseArrayList().size() != 0) {
@@ -59,11 +59,11 @@ public class SqliteHelper extends SQLiteOpenHelper {
             userBean.getPulseArrayList().clear();
         }
         if (userBean.getAngVArrayList().size() != 0) {
-            addPalstanceBySw(userBean.getAngVArrayList());
+            addAngVBySw(userBean.getAngVArrayList());
             userBean.getAngVArrayList().clear();
         }
         if (userBean.getMagArrayList().size() != 0) {
-            addMagnetismBySw(userBean.getMagArrayList());
+            addMagBySw(userBean.getMagArrayList());
             userBean.getMagArrayList().clear();
         }
         if (userBean.getPressureArrayList().size() != 0) {
@@ -72,7 +72,7 @@ public class SqliteHelper extends SQLiteOpenHelper {
         }
     }
 
-    private void addAOGBySw(ArrayList<GravA> list) {
+    private void addGravABySw(ArrayList<GravA> list) {
         db.beginTransaction();
         try {
             String time;
@@ -98,7 +98,7 @@ public class SqliteHelper extends SQLiteOpenHelper {
         db.endTransaction();
     }
 
-    private void addMagnetismBySw(ArrayList<Mag> list) {
+    private void addMagBySw(ArrayList<Mag> list) {
         db.beginTransaction();
         try {
             String time;
@@ -123,7 +123,7 @@ public class SqliteHelper extends SQLiteOpenHelper {
         db.endTransaction();
     }
 
-    private void addPalstanceBySw(ArrayList<AngV> list) {
+    private void addAngVBySw(ArrayList<AngV> list) {
         db.beginTransaction();
         try {
             String time;
