@@ -239,7 +239,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         Log.e("MSL", "onClick: gatt is not running");
                         btn_delete_flash.setClickable(true);
                     }
-
+                    btn_search_his.setClickable(true);
                     startWriteService();
 
                 } else if (btn_connect.getText().equals("断开")) {
@@ -250,6 +250,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     btn_search_magnetism.setClickable(false);
                     btn_search_pressure.setClickable(false);
                     btn_delete_flash.setClickable(false);
+                    btn_search_his.setClickable(false);
                 }
 
                 break;
@@ -270,8 +271,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 btn_search_palstance.setClickable(true);
                 btn_search_magnetism.setClickable(true);
                 btn_search_pressure.setClickable(true);
-
-                btn_search_his.setClickable(false);
 
                 break;
             case R.id.btn_search_pulse_his:
