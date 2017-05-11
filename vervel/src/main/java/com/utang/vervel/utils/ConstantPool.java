@@ -10,8 +10,8 @@ import android.app.Application;
 public class ConstantPool {
 
     //BluetoothProfile
-    public static final  java.util.UUID UUID_NOTIFY  = java.util.UUID.fromString("6e400003-b5a3-f393-e0a9-e50e24dcca9e");
-    public static final  java.util.UUID UUID_WRITE  = java.util.UUID.fromString("6e400002-b5a3-f393-e0a9-e50e24dcca9e");
+    public static final  java.util.UUID UUID_WRITE  = java.util.UUID.fromString("6e400002-b5a3-f393-e0a9-e50e24dcca9e");//weigan的
+    public static final  java.util.UUID UUID_NOTIFY  = java.util.UUID.fromString("6e400003-b5a3-f393-e0a9-e50e24dcca9e");//weigan的
 
     //instruct
     public static final byte HEAD = (byte) 0xAA;
@@ -41,8 +41,8 @@ public class ConstantPool {
     public static final byte[] DELETE_FLASH = new byte[]
             {HEAD,(byte)0x02,INSTRUCT_DELETE_FLASH,END};//清缓存
 
-    public static final String DEVICEID_1 = "Nordic-FC0942090";
-    public static final String DEVICEID_2 = "Nordic-9FBEE5315";
+    public static final String DEVICEID_1 = "Nordic-BE766AA9B";
+    public static final String DEVICEID_2 = "Nordic-98FD564AC";
 
     public static final String debugWifiName = "linux.utang.cn-puppet";
     public static final String debugWifiMac = "04:bd:70:da:1b:c0";

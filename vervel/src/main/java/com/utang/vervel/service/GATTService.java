@@ -45,8 +45,7 @@ import org.greenrobot.eventbus.ThreadMode;
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 public class GATTService extends Service {
 
-    public static final String DEVICE_ID = ConstantPool.DEVICEID_1;
-
+    public static final String DEVICE_ID = ConstantPool.DEVICEID_2;
     private BluetoothAdapter mBluetoothAdapter;
     private LeScanCallback_LOLLIPOP mScanCallBack_lollipop;//5.0以上
     private LeScanCallback_JELLY_BEAN mScanCallBack_jelly;//4.3以上
@@ -58,7 +57,7 @@ public class GATTService extends Service {
     private boolean mScanning;
     private BluetoothGattCharacteristic vibrationChar;
     private boolean isConnected = false;
-    private int cameCount = 0;
+    private int cameCount = -1;
     private BluetoothGatt mGatt;
 
     @Override
@@ -93,7 +92,6 @@ public class GATTService extends Service {
         }
         searchDevice();
     }
-
 
     private void searchDevice() {
         Log.i("MSL", "searchDevice: method running");
@@ -161,7 +159,6 @@ public class GATTService extends Service {
     }
 
     private class LeScanCallback_JELLY_BEAN implements BluetoothAdapter.LeScanCallback {
-
         @Override
         public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
             if (device.getName() != null && device.getName().equals(DEVICE_ID)) {
@@ -264,7 +261,7 @@ public class GATTService extends Service {
         @Override
         public void onDescriptorRead(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
 
-            Log.d("MSL", "onDescriptorRead: ");
+            Log.d("MSL", "onDescriptorRead: " + DataUtils.bytes2hex(descriptor.getValue()));
             commandPool.onCommandCallbackComplete();
         }
 
@@ -353,12 +350,14 @@ public class GATTService extends Service {
             int timeInt = DataUtils.bytes2IntUnsigned(timeBytes);//这里的timeInt是秒级别的
 //            Log.i("MSL", "readData: " + timeInt +","+ System.currentTimeMillis() / 1000);
 
-            if (getDataEnd(timeInt) && data[2] != ConstantPool.INSTRUCT_SEARCH_TIME) {//接收完截至到当前的数据
-                cameCount ++;
-                Log.d("MSL", "readData: " + cameCount) ;
-                if (cameCount == 1) {
-                    commandPool.addCommand(CommandPool.Type.write, ConstantPool.DELETE_FLASH, vibrationChar);
-                    EventUtil.post(new EventNotification("HIS_DATA", true));
+            if (cameCount != -1) {
+                if (getDataEnd(timeInt) && data[2] != ConstantPool.INSTRUCT_SEARCH_TIME) {//接收完截至到当前的数据
+                    cameCount++;
+                    Log.d("MSL", "readData: " + cameCount);
+                    if (cameCount == 5) {
+                        commandPool.addCommand(CommandPool.Type.write, ConstantPool.DELETE_FLASH, vibrationChar);
+                        EventUtil.post(new EventNotification("HIS_DATA", true));
+                    }
                 }
             }
             byte[] datas = null;//除去数据长度、指令、时间 之后的数组
@@ -453,7 +452,7 @@ public class GATTService extends Service {
     private boolean getDataEnd(int time) {
         int current = (int) (System.currentTimeMillis() / 1000);
 //        Log.d("MSL", "needSetTime: " + current + "," + time);
-        return current - time == 9 ;//因为删flash需要10s以上，所以这里定义9即可
+        return current - time == 9;//因为删flash需要10s以上，所以这里定义9即可
     }
 
 }

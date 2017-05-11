@@ -149,7 +149,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         };
         new Thread(runnable_time).start();
 
-        if (WIFIUtils.GetNetype(this)) {
+        if (WIFIUtils.isWifiType(this)) {
             isWifiState = true ;
             controlDeviceImp.showToast("当前连接：" + WIFIUtils.getWifiId((WifiManager) getSystemService(Context.WIFI_SERVICE)));
         }

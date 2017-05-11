@@ -43,9 +43,11 @@ public class DataUtils {
     public static byte int2OneByte(int num) {
         return (byte) (num & 0x000000ff);
     }
-    public static int oneByte2Int(byte byteNum) {
+
+    public static int Byte2Int(byte byteNum) {
         return byteNum > 0 ? byteNum : (128 + (128 + byteNum));
     }
+
     public static byte[] long2Bytes(long num) {
         byte[] byteNum = new byte[8];
         for (int ix = 0; ix < 8; ++ix) {
@@ -63,6 +65,7 @@ public class DataUtils {
         }
         return num;
     }
+
     public static String byte2hex(byte b) {
         String result = Integer.toHexString(b & 0xFF);
         if (result.length() == 1) {
@@ -121,7 +124,7 @@ public class DataUtils {
         System.out.println("int转行成one byte: " + int2OneByte);
         System.out.println("int转行成one byte: " + (byte)0x127);
 
-        int oneByte2Int = DataUtils.oneByte2Int(int2OneByte);
+        int oneByte2Int = DataUtils.Byte2Int(int2OneByte);
         System.out.println("one byte转行成int: " + oneByte2Int);
         System.out.println("one byte转行成int 2 : " + byte2Int(int2OneByte));
         System.out.println();

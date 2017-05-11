@@ -7,7 +7,7 @@ import java.util.ArrayList;
  * Created by user on 2017/5/2.
  */
 
-public class VarianceUtil {
+public class MathUtils {
 
     public static double getVarianceUtil(double[] nums) {
         double avg = 0 ;//平均值
@@ -17,9 +17,9 @@ public class VarianceUtil {
         avg /= nums.length ;
         double vari = 0 ;
         for (double n :nums) {
-            vari += Math.pow((n - avg),2 );
+            vari += java.lang.Math.pow((n - avg),2 );
         }
-        return Math.sqrt(vari / nums.length);
+        return java.lang.Math.sqrt(vari / nums.length);
     }
 
     public static void main (String[] args) {

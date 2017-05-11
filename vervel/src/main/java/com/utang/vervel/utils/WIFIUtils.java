@@ -22,7 +22,7 @@ public class WIFIUtils {
         return info.getBSSID();//wifi mac地址
     }
 
-    public static boolean GetNetype(Context context) {
+    public static boolean isWifiType(Context context) {
         ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
         return networkInfo != null && networkInfo.getType() == ConnectivityManager.TYPE_WIFI;

@@ -1,13 +1,10 @@
 package com.utang.vervel.service;
 
-import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Environment;
 import android.os.IBinder;
-import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -16,11 +13,10 @@ import com.utang.vervel.beans.UserBean;
 import com.utang.vervel.beans.UserJsonBean;
 import com.utang.vervel.dbUtils.DataBaseContext;
 import com.utang.vervel.dbUtils.SqliteHelper;
+import com.utang.vervel.moudul.WriteToCSV;
 import com.utang.vervel.net.RetrofitItfc;
 import com.utang.vervel.utils.ConstantPool;
 import com.utang.vervel.utils.EventUtil;
-import com.utang.vervel.utils.LogUtil;
-import com.utang.vervel.utils.WriteToCSV;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -135,7 +131,7 @@ public class WriteService extends Service {
                 UserJsonBean tmpUser = (UserJsonBean) ois.readObject();
                 String userJson = new Gson().toJson(tmpUser);
 //                LogUtil.LogMSL("MSL", userJson);
-
+//              设置timeout最长时间为10分钟
                 OkHttpClient client = new OkHttpClient.Builder()
                         .connectTimeout(600, TimeUnit.SECONDS)
                         .writeTimeout(600, TimeUnit.SECONDS)

@@ -1,4 +1,4 @@
-package com.utang.vervel.utils;
+package com.utang.vervel.moudul;
 
 import android.content.Context;
 import android.os.Environment;
@@ -14,6 +14,8 @@ import com.utang.vervel.beans.UserBean;
 import com.utang.vervel.beans.UserJsonBean;
 import com.utang.vervel.net.RetrofitItfc;
 import com.utang.vervel.service.GATTService;
+import com.utang.vervel.utils.DateUtils;
+import com.utang.vervel.utils.EventUtil;
 
 import java.io.BufferedWriter;
 import java.io.File;
