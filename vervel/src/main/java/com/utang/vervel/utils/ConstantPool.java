@@ -30,10 +30,10 @@ public class ConstantPool {
             {HEAD,(byte)0x02, INSTRUCT_SEARCH_TIME, END};//查询设备时间
 
     public static final byte[] PULSE_UP_ON = new byte[]
-        {HEAD,(byte)0x02, (byte) 0x01,INSTRUCT_SEARCH_PULSE, END};//实时心率上传开关 PULSE_UP_ON[2]：0x01:on || 0x02:off
+        {HEAD,(byte)0x03, INSTRUCT_SEARCH_PULSE, (byte) 0x01,END};//实时心率上传开关 PULSE_UP_ON[3]：0x01:on || 0x00:off
 
     public static final byte[] PULSE_UP_OFF = new byte[]
-            {HEAD,(byte)0x02, (byte) 0x02,INSTRUCT_SEARCH_PULSE, END};//实时心率上传开关 PULSE_UP_ON[2]：0x01:on || 0x02:off
+            {HEAD,(byte)0x03, INSTRUCT_SEARCH_PULSE,(byte) 0x00, END};//实时心率上传开关 PULSE_UP_ON[2]：0x01:on || 0x00:off
 
     public static final byte[] SEARCH_HIS = new byte[]
             {HEAD,(byte)0x02, INSTRUCT_HIS, END};//查询历史数据
@@ -41,8 +41,10 @@ public class ConstantPool {
     public static final byte[] DELETE_FLASH = new byte[]
             {HEAD,(byte)0x02,INSTRUCT_DELETE_FLASH,END};//清缓存
 
-    public static final String DEVICEID_1 = "Nordic-BE766AA9B";
+    public static final String DEVICEID_1 = "Nordic-9FBEE5315";
     public static final String DEVICEID_2 = "Nordic-98FD564AC";
+    public static final String DEVICEID_3 = "Nordic-FC0942090";
+    public static final String DEVICEID_4 = "Nordic-BE766AA9B";
 
     public static final String debugWifiName = "linux.utang.cn-puppet";
     public static final String debugWifiMac = "04:bd:70:da:1b:c0";

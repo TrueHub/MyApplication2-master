@@ -1,4 +1,4 @@
-package com.utang.vervel.moudul;
+package com.utang.vervel.utils;
 
 import android.content.Context;
 import android.os.Environment;
@@ -14,8 +14,7 @@ import com.utang.vervel.beans.UserBean;
 import com.utang.vervel.beans.UserJsonBean;
 import com.utang.vervel.net.RetrofitItfc;
 import com.utang.vervel.service.GATTService;
-import com.utang.vervel.utils.DateUtils;
-import com.utang.vervel.utils.EventUtil;
+
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -81,7 +80,6 @@ public class WriteToCSV {
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 Log.e("MSL", "onResponse: Fail" + t);
                 EventUtil.post("上传失败");
-
                 //需求：上传失败时，将未上传的数据存为tmp，等待有网络可上传时再次上传
                 saveToTmp(userJsonBean);
             }

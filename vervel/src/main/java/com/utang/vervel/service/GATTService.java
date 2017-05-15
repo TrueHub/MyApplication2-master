@@ -45,7 +45,7 @@ import org.greenrobot.eventbus.ThreadMode;
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 public class GATTService extends Service {
 
-    public static final String DEVICE_ID = ConstantPool.DEVICEID_2;
+    public static final String DEVICE_ID = ConstantPool.DEVICEID_4;
     private BluetoothAdapter mBluetoothAdapter;
     private LeScanCallback_LOLLIPOP mScanCallBack_lollipop;//5.0以上
     private LeScanCallback_JELLY_BEAN mScanCallBack_jelly;//4.3以上
@@ -253,7 +253,7 @@ public class GATTService extends Service {
             if (characteristic.getUuid().equals(ConstantPool.UUID_NOTIFY)) {
                 commandPool.onCommandCallbackComplete();
                 byte[] data = characteristic.getValue();
-//                Log.d("MSL", "onCharacteristicChanged: " + DataUtils.bytes2hex(data));
+                Log.d("MSL", "onCharacteristicChanged: " + DataUtils.bytes2hex(data));
                 readData(data);
             }
         }
@@ -354,7 +354,7 @@ public class GATTService extends Service {
                 if (getDataEnd(timeInt) && data[2] != ConstantPool.INSTRUCT_SEARCH_TIME) {//接收完截至到当前的数据
                     cameCount++;
                     Log.d("MSL", "readData: " + cameCount);
-                    if (cameCount == 5) {
+                    if (cameCount == 3) {
                         commandPool.addCommand(CommandPool.Type.write, ConstantPool.DELETE_FLASH, vibrationChar);
                         EventUtil.post(new EventNotification("HIS_DATA", true));
                     }

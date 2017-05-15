@@ -13,7 +13,7 @@ import com.utang.vervel.beans.UserBean;
 import com.utang.vervel.beans.UserJsonBean;
 import com.utang.vervel.dbUtils.DataBaseContext;
 import com.utang.vervel.dbUtils.SqliteHelper;
-import com.utang.vervel.moudul.WriteToCSV;
+import com.utang.vervel.utils.WriteToCSV;
 import com.utang.vervel.net.RetrofitItfc;
 import com.utang.vervel.utils.ConstantPool;
 import com.utang.vervel.utils.EventUtil;
